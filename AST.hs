@@ -15,7 +15,7 @@ data Exp = Num Int
         | Decr Exp
 
         | Program [Exp]
-        | Block [Exp] [Exp]
+        | Block [Exp]
 
         | Decl Type [Exp]
 

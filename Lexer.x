@@ -16,6 +16,8 @@ $white+                                 ;  -- skip whitespace
 
 "/*"(\*$white|(\*[^\/])|[^\*]|$white)*"*/"       ; -- skip comments multiple lines
 
+"fun"                           { \s -> TFun }
+"main"                          { \s -> TMain }
 -- Expressions
 "+"                             { \s -> TPlus }
 "-"                             { \s -> TMinus }
@@ -55,6 +57,8 @@ $digit+                         { \s -> TNum (read s) }
 {
  -- the token type
 data Token = TNum Int
+            | TFun
+            | TMain
             | TPlus 
             | TMinus 
             | TMult 
