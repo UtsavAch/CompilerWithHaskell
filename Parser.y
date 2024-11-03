@@ -69,12 +69,12 @@ stmt: decl_stmt                     { $1 }
     | if_stmt                       { $1 }
     | while_stmt                    { $1 }
     | "print" "(" expr ")"          { Print $3 }
-    | "readln" "(" ")"              { Readln }
     | expr_stmt                     { ExprStmt $1 }
 
 expr_stmt: expr                     { ExprStmt $1 }
 
 expr: or_expr                       { $1 }
+    | "readln" "(" ")"              { Readln }
 
 assign_stmt: id "=" expr            { Assign (Var $1) $3 }
            | expr "++"              {Incr $1}
