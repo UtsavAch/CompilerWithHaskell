@@ -67,16 +67,14 @@ stmt: decl_stmt                     { $1 }
     | assign_stmt                   { $1 }
     | if_stmt                       { $1 }
     | while_stmt                    { $1 }
-    | expr_stmt                     { $1 }
     | "print" "(" expr ")"          { Print $3 }
     | "readln" "(" ")"              { Readln }
 
 expr_stmt: expr                     { ExprStmt $1 }
 
-expr: assign_expr                   { $1 }
+expr: or_expr                       { $1 }
 
-assign_expr: id "=" assign_expr     { Assign (Var $1) $3 }
-           | or_expr                { $1 }
+assign_stmt: id "=" expr            { Assign (Var $1) $3 }
 
 or_expr: or_expr "||" and_expr      { Or $1 $3 }
        | and_expr                   { $1 }
@@ -114,8 +112,6 @@ primary: num                        { Num $1 }
 
 decl_stmt: "var" id "=" expr { Decl TyInt [Assign (Var $2) $4] }
          | "val" id "=" expr { Decl TyInt [Assign (Var $2) $4] }
-
-assign_stmt: id "=" expr { Assign (Var $1) $3 }
 
 if_stmt: "if" "(" expr ")" block { If $3 $5 }
        | "if" "(" expr ")" block "else" block { IfElse $3 $5 $7 }
