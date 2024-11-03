@@ -116,7 +116,7 @@ primary: num                        { Num $1 }
        | string                     { String $1 }
 
 decl_stmt: "var" id "=" expr        { Decl TyInt [Assign (Var $2) $4] }
-         | "val" id "=" expr        { Decl TyInt [Assign (Var $2) $4] }
+         | "val" id "=" expr        { Decl TyInt [Assign (Val $2) $4] }
 
 if_stmt: "if" "(" expr ")" block    { If $3 $5 }
        | "if" "(" expr ")" block "else" block { IfElse $3 $5 $7 }
