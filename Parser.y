@@ -59,11 +59,10 @@ id                              { TId $$ }
 program: "fun" "main" "(" ")" block { Program $5 }
        | "fun" "main" "(" ")" stmt  { Program $5 }
 
-block: "{" stmt "}"                 { Block [$2] }
-     | "{" stmt_list "}"            { Block $2 }
+block: "{" stmt_list "}"            { Block $2 }
 
-stmt_list: stmt stmt_list           { $1 : $2 }
-         | stmt                     { [$1] }
+stmt_list: stmt stmt_list            { $1 : $2 }
+          |                          { [] }
 
 stmt: decl_stmt                     { $1 }
     | assign_stmt                   { $1 }
