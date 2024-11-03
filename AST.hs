@@ -6,6 +6,8 @@ data Exp = Num Int
         | Val String
         | String String
 
+        | ExprStmt Exp
+
         | Add Exp Exp
         | Sub Exp Exp 
         | Mult Exp Exp 
@@ -14,7 +16,7 @@ data Exp = Num Int
         | Incr Exp
         | Decr Exp
 
-        | Program [Exp]
+        | Program Exp
         | Block [Exp]
 
         | Decl Type [Exp]
@@ -27,6 +29,7 @@ data Exp = Num Int
         | For Exp Exp
 
         | Equal Exp Exp
+        | NotEqual Exp Exp
         | Diff Exp Exp
         | Less Exp Exp
         | LessEq Exp Exp

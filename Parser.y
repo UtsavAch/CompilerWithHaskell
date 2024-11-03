@@ -57,11 +57,13 @@ id                              { TId $$ }
 %%
 
 program: "fun" "main" "(" ")" block { Program $5 }
+       | "fun" "main" "(" ")" stmt  { Program $5 }
 
-block: "{" stmt_list "}" { Block $2 }
+block: "{" stmt "}" { Block [$2] }
+     | "{" stmt_list "}" { Block $2 }
 
-stmt_list:                  { [] }
-         | stmt stmt_list   { $1 : $2 }
+stmt_list: stmt stmt_list { $1 : $2 }
+         | stmt           { [$1] }
 
 stmt: decl_stmt                     { $1 }
     | assign_stmt                   { $1 }
@@ -69,6 +71,7 @@ stmt: decl_stmt                     { $1 }
     | while_stmt                    { $1 }
     | "print" "(" expr ")"          { Print $3 }
     | "readln" "(" ")"              { Readln }
+    | expr_stmt                     { ExprStmt $1 }
 
 expr_stmt: expr                     { ExprStmt $1 }
 
@@ -109,6 +112,7 @@ primary: num                        { Num $1 }
        | "true"                     { Bool True }
        | "false"                    { Bool False }
        | "(" expr ")"               { $2 }
+       | string                     { String $1 }  -- Add this line
 
 decl_stmt: "var" id "=" expr { Decl TyInt [Assign (Var $2) $4] }
          | "val" id "=" expr { Decl TyInt [Assign (Var $2) $4] }
@@ -120,5 +124,6 @@ while_stmt: "while" "(" expr ")" block { While $3 $5 }
 
 {
 parseError :: [Token] -> a
-parseError toks = error "parse error"
+parseError toks = error $ "Parse error at: " ++ show toks
+
 }
