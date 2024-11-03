@@ -43,15 +43,16 @@ num                             { TNum $$ }
 "!"                             { TNot }
 "||"                            { TOr }
 "&&"                            { TAnd }
-string                          { TString $$}
+string                          { TString $$ }
 id                              { TId $$ }
 
-%nonassoc "==" "!=" "<" "<=" ">" ">=" "||"   
-%left "&&"                                   
-%left "||"                                   
-%left '+' '-'                                
-%left '*' '/' '%'                            
-%right '!'                                   
+%nonassoc "==" "!=" "<" "<=" ">" ">="
+%left "&&"
+%left "||"
+%left '+' '-'
+%left '*' '/' '%'
+%right '!'
+%right '='
 
 %%
 
@@ -67,23 +68,49 @@ stmt: decl_stmt                     { $1 }
     | if_stmt                       { $1 }
     | while_stmt                    { $1 }
     | expr_stmt                     { $1 }
-    | "print" "(" expr_stmt ")"     { Print $3 }
+    | "print" "(" expr ")"          { Print $3 }
     | "readln" "(" ")"              { Readln }
 
-expr: expr "+" expr                 { Add $1 $3 }
-    | expr "-" expr                 { Sub $1 $3 }
-    | expr "*" expr                 { Mult $1 $3 }
-    | expr "/" expr                 { Div $1 $3 }
-    | expr "%" expr                 { Mod $1 $3 }
-    | expr "&&" expr                { And $1 $3 }
-    | expr "||" expr                { Or $1 $3 }
-    | expr "==" expr                { Equal $1 $3 }
-    | "!" expr                      { Not $2 }
-    | "(" expr ")"                  { $2 }
-    | num                           { Num $1 }
-    | id                            { Var $1 }
-    | "true"                        { Bool True }
-    | "false"                       { Bool False }
+expr_stmt: expr                     { ExprStmt $1 }
+
+expr: assign_expr                   { $1 }
+
+assign_expr: id "=" assign_expr     { Assign (Var $1) $3 }
+           | or_expr                { $1 }
+
+or_expr: or_expr "||" and_expr      { Or $1 $3 }
+       | and_expr                   { $1 }
+
+and_expr: and_expr "&&" eq_expr     { And $1 $3 }
+        | eq_expr                   { $1 }
+
+eq_expr: eq_expr "==" rel_expr      { Equal $1 $3 }
+       | eq_expr "!=" rel_expr      { NotEqual $1 $3 }
+       | rel_expr                   { $1 }
+
+rel_expr: rel_expr "<" add_expr     { Less $1 $3 }
+        | rel_expr "<=" add_expr    { LessEq $1 $3 }
+        | rel_expr ">" add_expr     { Greater $1 $3 }
+        | rel_expr ">=" add_expr    { GreaterEq $1 $3 }
+        | add_expr                  { $1 }
+
+add_expr: add_expr "+" mul_expr     { Add $1 $3 }
+        | add_expr "-" mul_expr     { Sub $1 $3 }
+        | mul_expr                  { $1 }
+
+mul_expr: mul_expr "*" unary_expr   { Mult $1 $3 }
+        | mul_expr "/" unary_expr   { Div $1 $3 }
+        | mul_expr "%" unary_expr   { Mod $1 $3 }
+        | unary_expr                { $1 }
+
+unary_expr: "!" unary_expr          { Not $2 }
+          | primary                 { $1 }
+
+primary: num                        { Num $1 }
+       | id                         { Var $1 }
+       | "true"                     { Bool True }
+       | "false"                    { Bool False }
+       | "(" expr ")"               { $2 }
 
 decl_stmt: "var" id "=" expr { Decl TyInt [Assign (Var $2) $4] }
          | "val" id "=" expr { Decl TyInt [Assign (Var $2) $4] }
@@ -94,8 +121,6 @@ if_stmt: "if" "(" expr ")" block { If $3 $5 }
        | "if" "(" expr ")" block "else" block { IfElse $3 $5 $7 }
 
 while_stmt: "while" "(" expr ")" block { While $3 $5 }
-
-expr_stmt: expr
 
 {
 parseError :: [Token] -> a
