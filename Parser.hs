@@ -1179,7 +1179,7 @@ happyReduction_50 ((HappyAbsSyn9  happy_var_4) `HappyStk`
 	_ `HappyStk`
 	happyRest)
 	 = HappyAbsSyn19
-		 (Decl TyInt [Assign (Var happy_var_2) happy_var_4]
+		 (Decl [Assign (Var happy_var_2) happy_var_4]
 	) `HappyStk` happyRest
 
 happyReduce_51 = happyReduce 4 19 happyReduction_51
@@ -1189,7 +1189,7 @@ happyReduction_51 ((HappyAbsSyn9  happy_var_4) `HappyStk`
 	_ `HappyStk`
 	happyRest)
 	 = HappyAbsSyn19
-		 (Decl TyInt [Assign (Val happy_var_2) happy_var_4]
+		 (Decl [Assign (Val happy_var_2) happy_var_4]
 	) `HappyStk` happyRest
 
 happyReduce_52 = happyReduce 5 20 happyReduction_52

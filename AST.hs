@@ -19,7 +19,7 @@ data Exp = Num Int
         | Program Exp
         | Block [Exp]
 
-        | Decl Type [Exp]
+        | Decl [Exp]
 
         | Assign Exp Exp
 
