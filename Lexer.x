@@ -18,7 +18,6 @@ $white+                                 ;  -- skip whitespace
 
 "fun"                           { \s -> TFun }
 "main"                          { \s -> TMain }
--- Expressions
 "+"                             { \s -> TPlus }
 "-"                             { \s -> TMinus }
 "*"                             { \s -> TMult }
@@ -30,10 +29,14 @@ $white+                                 ;  -- skip whitespace
 "false"                         { \s -> TFalse }
 "print"                         { \s -> TPrint }
 "readln"                        { \s -> TReadln }
--- Commands
-"val"                           {\s -> TVal}
-"var"                           {\s -> TVar}
+"val"                           { \s -> TVal}
+"var"                           { \s -> TVar}
 "="                             { \s -> TAssign }
+"+="                            { \s -> TPlusAssign }
+"-="                            { \s -> TMinusAssign }
+"*="                            { \s -> TMultAssign }
+"/="                            { \s -> TDivAssign }
+"%="                            { \s -> TModAssign }
 "while"                         { \s -> TWhile }
 "if"                            { \s -> TIf }
 "else"                          { \s -> TElse }
@@ -73,6 +76,11 @@ data Token = TNum Int
             | TVal
             | TVar
             | TAssign 
+            | TPlusAssign
+            | TMinusAssign
+            | TMultAssign
+            | TDivAssign
+            | TModAssign
             | TWhile 
             | TIf 
             | TElse 

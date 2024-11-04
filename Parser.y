@@ -27,6 +27,11 @@ num                             { TNum $$ }
 "val"                           { TVal }
 "var"                           { TVar }
 "="                             { TAssign }
+"+="                            { TPlusAssign }
+"-="                            { TMinusAssign }
+"*="                            { TMultAssign }
+"/="                            { TDivAssign }
+"%="                            { TModAssign }
 "while"                         { TWhile }
 "if"                            { TIf }
 "else"                          { TElse }
@@ -57,12 +62,11 @@ id                              { TId $$ }
 %%
 
 program: "fun" "main" "(" ")" block { Program $5 }
-       | "fun" "main" "(" ")" stmt  { Program $5 }
 
 block: "{" stmt_list "}"            { Block $2 }
 
-stmt_list: stmt stmt_list            { $1 : $2 }
-          |                          { [] }
+stmt_list: stmt stmt_list           { $1 : $2 }
+          |                         { [] }
 
 stmt: decl_stmt                     { $1 }
     | assign_stmt                   { $1 }
@@ -77,8 +81,13 @@ expr: or_expr                       { $1 }
     | "readln" "(" ")"              { Readln }
 
 assign_stmt: id "=" expr            { Assign (Var $1) $3 }
-           | expr "++"              {Incr $1}
-           | expr "--"              {Decr $1}
+           | id "+=" expr           { Assign (Var $1) (Add (Var $1) $3) }
+           | id "-=" expr           { Assign (Var $1) (Sub (Var $1) $3) }
+           | id "*=" expr           { Assign (Var $1) (Mult (Var $1) $3) }
+           | id "/=" expr           { Assign (Var $1) (Div (Var $1) $3) }
+           | id "%=" expr           { Assign (Var $1) (Mod (Var $1) $3) }
+           | expr "++"              { Incr $1 }
+           | expr "--"              { Decr $1 }
 
 or_expr: or_expr "||" and_expr      { Or $1 $3 }
        | and_expr                   { $1 }
@@ -118,13 +127,12 @@ primary: num                        { Num $1 }
 decl_stmt: "var" id "=" expr        { Decl TyInt [Assign (Var $2) $4] }
          | "val" id "=" expr        { Decl TyInt [Assign (Val $2) $4] }
 
-if_stmt: "if" "(" expr ")" block    { If $3 $5 }
-       | "if" "(" expr ")" block "else" block { IfElse $3 $5 $7 }
+if_stmt: "if" "(" expr ")" block                 { If $3 $5 }
+       | "if" "(" expr ")" block "else" block    { IfElse $3 $5 $7 }
 
-while_stmt: "while" "(" expr ")" block { While $3 $5 }
+while_stmt: "while" "(" expr ")" block           { While $3 $5 }
 
 {
 parseError :: [Token] -> a
 parseError toks = error $ "Parse error at: " ++ show toks
-
 }
