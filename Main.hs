@@ -11,4 +11,4 @@ main = do
   print (alexScanTokens txt)
   print("--------------------------------")
   print("---- PARSED TREE ----")
-  print (parser $ alexScanTokens txt)
+  print (parser $ alexScanTokens txt) 

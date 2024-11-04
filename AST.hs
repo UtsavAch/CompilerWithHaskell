@@ -43,8 +43,3 @@ data Exp = Num Int
         | Println Exp
         | Readln
         deriving Show
-
-data Type = TyInt
-          | TyBool
-          | TyString
-          deriving Show
