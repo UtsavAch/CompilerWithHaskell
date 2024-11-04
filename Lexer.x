@@ -28,6 +28,7 @@ $white+                                 ;  -- skip whitespace
 "true"                          { \s -> TTrue }
 "false"                         { \s -> TFalse }
 "print"                         { \s -> TPrint }
+"println"                       { \s -> TPrintln }
 "readln"                        { \s -> TReadln }
 "val"                           { \s -> TVal}
 "var"                           { \s -> TVar}
@@ -72,6 +73,7 @@ data Token = TNum Int
             | TTrue 
             | TFalse 
             | TPrint 
+            | TPrintln
             | TReadln 
             | TVal
             | TVar

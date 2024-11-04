@@ -23,6 +23,7 @@ num                             { TNum $$ }
 "true"                          { TTrue }
 "false"                         { TFalse }
 "print"                         { TPrint }
+"println"                       { TPrintln }
 "readln"                        { TReadln }
 "val"                           { TVal }
 "var"                           { TVar }
@@ -73,6 +74,7 @@ stmt: decl_stmt                     { $1 }
     | if_stmt                       { $1 }
     | while_stmt                    { $1 }
     | "print" "(" expr ")"          { Print $3 }
+    | "println" "(" expr ")"        { Println $3 }
     | expr_stmt                     { ExprStmt $1 }
 
 expr_stmt: expr                     { ExprStmt $1 }

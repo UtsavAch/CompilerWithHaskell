@@ -40,6 +40,7 @@ data Exp = Num Int
         | Not Exp
 
         | Print Exp
+        | Println Exp
         | Readln
         deriving Show
 
