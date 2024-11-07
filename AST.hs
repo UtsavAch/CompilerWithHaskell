@@ -25,7 +25,6 @@ data Exp = Num Int
 
         | If Exp Exp
         | IfElse Exp Exp Exp
-        | IfExpr Exp Exp Exp
         | While Exp Exp
         | For Exp Exp
 

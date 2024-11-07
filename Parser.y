@@ -68,11 +68,10 @@ block: "{" stmt_list "}"                       { Block $2 }
 
 stmt_list: stmt stmt_list                      { $1 : $2 }
           |                                    { [] }
-
 stmt: decl_stmt                                { $1 }
     | assign_stmt                              { $1 }
     | if_stmt                                  { $1 }
-    | if_expr_stmt                             { $1 }
+    | if_block                                 { $1 }
     | while_stmt                               { $1 }
     | "print" "(" expr ")"                     { Print $3 }
     | "println" "(" expr ")"                   { Println $3 }
@@ -80,13 +79,8 @@ stmt: decl_stmt                                { $1 }
 
 expr_stmt: expr                                { ExprStmt $1 }
 
--- Define a separate rule for `if_expr` as a statement
-if_expr_stmt: if_expr                          { ExprStmt $1 }
-
 expr: or_expr                                  { $1 }
     | "readln" "(" ")"                         { Readln }
-
-if_expr: "if" "(" expr ")" expr "else" expr    { IfElse $3 $5 $7 }
 
 assign_stmt: id "=" expr                       { Assign (Var $1) $3 }
            | id "+=" expr                      { Assign (Var $1) (Add (Var $1) $3) }
@@ -135,10 +129,11 @@ primary: num                                   { Num $1 }
 decl_stmt: "var" id "=" expr                   { Decl [Assign (Var $2) $4] }
          | "val" id "=" expr                   { Decl [Assign (Val $2) $4] }
 
-if_stmt: "if" "(" expr ")" stmt "else" stmt  { IfElse $3 $5 $7 }
-       | "if" "(" expr ")" stmt              { If $3 $5 }
-       | "if" "(" expr ")" block "else" block  { IfElse $3 $5 $7 }
-       | "if" "(" expr ")" block               { If $3 $5 }
+if_stmt: "if" "(" expr ")" stmt "else" stmt    { IfElse $3 $5 $7 }
+       | "if" "(" expr ")" stmt                { If $3 $5 }
+
+if_block: "if" "(" expr ")" block "else" block { IfElse $3 $5 $7 }
+         | "if" "(" expr ")" block             { If $3 $5 }
 
 while_stmt: "while" "(" expr ")" block         { While $3 $5 }
 
