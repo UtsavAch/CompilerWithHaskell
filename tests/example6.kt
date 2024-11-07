@@ -12,6 +12,7 @@ fun main() {
         if (input == 1) {
             println("You entered a valid number!")
             success = true
+            if(success == true) if(success == false) success = false else success = false
         } else {
             println("Invalid input, try again.")
         }
