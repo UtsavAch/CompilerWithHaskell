@@ -73,14 +73,14 @@ stmt: decl_stmt                                { $1 }
     | if_stmt                                  { $1 }
     | if_block                                 { $1 }
     | while_stmt                               { $1 }
-    | "print" "(" expr ")"                     { Print $3 }
-    | "println" "(" expr ")"                   { Println $3 }
     | expr_stmt                                { $1 }
 
 expr_stmt: expr                                { ExprStmt $1 }
 
 expr: or_expr                                  { $1 }
     | "readln" "(" ")"                         { Readln }
+    | "print" "(" expr ")"                     { Print $3 }
+    | "println" "(" expr ")"                   { Println $3 }
 
 assign_stmt: id "=" expr                       { Assign (Var $1) $3 }
            | id "+=" expr                      { Assign (Var $1) (Add (Var $1) $3) }
