@@ -1,6 +1,8 @@
 module SymbolTable where
 
 import AST
+import qualified Data.Map as Map
+import Data.Map (Map)
 
 -- Data type for a symbol
 data Symbol = Symbol {
@@ -9,20 +11,21 @@ data Symbol = Symbol {
     symbolScope :: Int  -- Depth of the scope
 } deriving (Show, Eq)
 
--- Symbol table as a list of key-value pairs
-type SymbolTable = [(String, Symbol)]
+-- Symbol table as a Map
+type SymbolTable = Map String Symbol
 
 -- Insert a new symbol into the table
 insertSymbol :: SymbolTable -> Symbol -> SymbolTable
-insertSymbol table symbol = table ++ [(symbolName symbol, symbol)]
+insertSymbol table symbol = Map.insert (symbolName symbol) symbol table
 
 -- Lookup a symbol by name
 lookupSymbol :: SymbolTable -> String -> Maybe Symbol
-lookupSymbol table name = lookup name table
+lookupSymbol table name = Map.lookup name table
+
 
 -- Delete symbols in a specific scope (on scope exit)
 removeScope :: SymbolTable -> Int -> SymbolTable
-removeScope table scope = filter (\(_, s) -> symbolScope s /= scope) table
+removeScope table scope = Map.filter (\s -> symbolScope s /= scope) table
 
 -- Function to construct the symbol table from the AST
 buildSymbolTable :: Exp -> SymbolTable -> Int -> SymbolTable

@@ -4,6 +4,7 @@ import Lexer
 import Parser
 import AST
 import SymbolTable
+import qualified Data.Map as Map
 
 main :: IO ()
 main = do
@@ -23,6 +24,6 @@ main = do
     putStrLn "--------------------------------"
 
     -- Build the symbol table from the AST
-    let symbolTable = buildSymbolTable parsedTree [] 0
+    let symbolTable = buildSymbolTable parsedTree Map.empty 0
     putStrLn "---- SYMBOL TABLE ----"
     print symbolTable
