@@ -70,8 +70,7 @@ stmt_list: stmt stmt_list                      { $1 : $2 }
           |                                    { [] }
 stmt: decl_stmt                                { $1 }
     | assign_stmt                              { $1 }
-    | if_stmt                                  { $1 }
-    | if_block                                 { $1 }
+    | if_block_or_stmt                         { $1 }
     | while_stmt                               { $1 }
     | expr_stmt                                { $1 }
 
@@ -129,11 +128,11 @@ primary: num                                   { Num $1 }
 decl_stmt: "var" id "=" expr                   { Decl [Assign (Var $2) $4] }
          | "val" id "=" expr                   { Decl [Assign (Val $2) $4] }
 
-if_stmt: "if" "(" expr ")" stmt "else" stmt    { IfElse $3 $5 $7 }
-       | "if" "(" expr ")" stmt                { If $3 $5 }
+block_or_stmt: block                           { $1 }
+        | stmt                                 { $1 }
 
-if_block: "if" "(" expr ")" block "else" block { IfElse $3 $5 $7 }
-         | "if" "(" expr ")" block             { If $3 $5 }
+if_block_or_stmt: "if" "(" block_or_stmt ")" block_or_stmt "else" block_or_stmt    { IfElse $3 $5 $7 }
+       | "if" "(" block_or_stmt ")" block_or_stmt                                  { If $3 $5 }
 
 while_stmt: "while" "(" expr ")" block         { While $3 $5 }
 

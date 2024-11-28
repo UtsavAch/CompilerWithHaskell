@@ -53,7 +53,7 @@ $white+                                 ;  -- skip whitespace
 "<="                            { \s -> TLessEq }
 "!"                             { \s -> TNot }
 "||"                            { \s -> TOr }
-"&&"                            { \s -> TAnd }
+"&&"                            { \s -> TAnd }          
 \"[^\"]*\"                      { \s -> TString (init (tail s)) }
 [A-Za-z_][A-Za-z0-9_]*          { \s -> TId s }
 $digit+                         { \s -> TNum (read s) }
@@ -99,6 +99,7 @@ data Token = TNum Int
             | TNot 
             | TOr 
             | TAnd 
+            | TColon
             | TId String
             | TString String
             deriving (Eq, Show)

@@ -42,4 +42,4 @@ data Exp = Num Int
         | Print Exp
         | Println Exp
         | Readln
-        deriving Show
+        deriving Show 
