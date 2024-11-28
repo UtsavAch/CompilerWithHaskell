@@ -3,7 +3,7 @@ module Main where
 import Lexer
 import Parser
 import AST
-import SymbolTable
+import Semantics
 import qualified Data.Map as Map
 
 main :: IO ()
