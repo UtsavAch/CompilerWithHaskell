@@ -1,9 +1,9 @@
 fun main() {
-    val maxTries = 3
+    var maxTries = 3
     var attempts = 0
     var success = false
     var abccccc = "bsajbckcs"
-    val successMessage = "You entered a valid number!"
-    val errorMessage = "Invalid input, try again."
-    val finalMessage = "Thank you for following instructions."
+    var successMessage = "You entered a valid number!"
+    var errorMessage = "Invalid input, try again."
+    var finalMessage = "Thank you for following instructions."
 }

@@ -1,6 +1,6 @@
 fun main() {
     print("Enter a number: ")
-    val input = readln()
+    var input = readln()
     var factorial = 1
     var i = 1
 

@@ -41,14 +41,8 @@ processStmt table (Decl [Assign (Var name) expr]) =
             else error $ "Type mismatch: Variable " ++ name ++ " expected type " ++ symbolType symbol ++ " but got " ++ exprType
         -- If not declared, insert into the symbol table
         Nothing -> insertSymbol table (Symbol name exprType)
-processStmt table (Decl [Assign (Val name) expr]) =
-    let exprType = inferType expr table
-    in case lookupSymbol table name of
-        -- Handle value declarations (immutability check can be added later)
-        Just _ -> error $ "Immutable variable " ++ name ++ " is already declared"
-        Nothing -> insertSymbol table (Symbol name exprType)
 
--- Handle assignments separately
+-- Handle assignments
 processStmt table (Assign (Var name) expr) =
     let exprType = inferType expr table
     in case lookupSymbol table name of
@@ -59,8 +53,6 @@ processStmt table (Assign (Var name) expr) =
             else error $ "Type mismatch: Variable " ++ name ++ " expected type " ++ symbolType symbol ++ " but got " ++ exprType
         -- If variable is not declared, throw an error
         Nothing -> error $ "Undefined variable: " ++ name
-processStmt table (Assign (Val name) expr) =
-    error $ "Cannot reassign to immutable value: " ++ name
 
 -- Handle complex expressions like blocks
 processStmt table (Block stmts) =
@@ -68,7 +60,6 @@ processStmt table (Block stmts) =
 
 -- Ignore standalone expressions
 processStmt table _ = table
-
 
 -- ///////////////////////////////////////////////
 -- Function to infer the type of an expression

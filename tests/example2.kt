@@ -1,8 +1,8 @@
 fun main() {
-    val a = true
-    val b = false
-    val andResult = a && b
-    val orResult = a || b
-    val notResult = !a
+    var a = true
+    var b = false
+    var andResult = a && b
+    var orResult = a || b
+    var notResult = !a
     print("AND: $andResult, OR: $orResult, NOT: $notResult")
 }
