@@ -24,6 +24,6 @@ main = do
     putStrLn "--------------------------------"
 
     -- Build the symbol table from the AST
-    let symbolTable = buildSymbolTable parsedTree Map.empty 0
+    let symbolTable = buildSymbolTable parsedTree Map.empty
     putStrLn "---- SYMBOL TABLE ----"
     print symbolTable

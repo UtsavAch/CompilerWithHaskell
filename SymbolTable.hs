@@ -7,8 +7,7 @@ import Data.Map (Map)
 -- Data type for a symbol
 data Symbol = Symbol {
     symbolName :: String,
-    symbolType :: String,
-    symbolScope :: Int  -- Depth of the scope
+    symbolType :: String
 } deriving (Show, Eq)
 
 -- Symbol table as a Map
@@ -22,31 +21,26 @@ insertSymbol table symbol = Map.insert (symbolName symbol) symbol table
 lookupSymbol :: SymbolTable -> String -> Maybe Symbol
 lookupSymbol table name = Map.lookup name table
 
-
--- Delete symbols in a specific scope (on scope exit)
-removeScope :: SymbolTable -> Int -> SymbolTable
-removeScope table scope = Map.filter (\s -> symbolScope s /= scope) table
-
 -- Function to construct the symbol table from the AST
-buildSymbolTable :: Exp -> SymbolTable -> Int -> SymbolTable
-buildSymbolTable (Program (Block stmts)) table scope =
-    foldl (\tbl stmt -> processStmt stmt tbl scope) table stmts
-buildSymbolTable _ table _ = table
+buildSymbolTable :: Exp -> SymbolTable -> SymbolTable
+buildSymbolTable (Program (Block stmts)) table =
+    foldl processStmt table stmts
+buildSymbolTable _ table = table
 
 -- Helper function to process statements and update the symbol table
-processStmt :: Exp -> SymbolTable -> Int -> SymbolTable
+processStmt :: SymbolTable -> Exp -> SymbolTable
 -- Handle variable and value declarations with assignments
-processStmt (Decl [Assign (Val name) expr]) table scope =
+processStmt table (Decl [Assign (Val name) expr]) =
     let typ = inferType expr table
-    in insertSymbol table (Symbol name typ scope)
-processStmt (Decl [Assign (Var name) expr]) table scope =
+    in insertSymbol table (Symbol name typ)
+processStmt table (Decl [Assign (Var name) expr]) =
     let typ = inferType expr table
-    in insertSymbol table (Symbol name typ scope)
+    in insertSymbol table (Symbol name typ)
 -- Handle complex expressions like blocks
-processStmt (Block stmts) table scope =
-    foldl (\tbl stmt -> processStmt stmt tbl (scope + 1)) table stmts
--- Handle standalone expressions (e.g., And, Or, etc.)
-processStmt _ table _ = table
+processStmt table (Block stmts) =
+    foldl processStmt table stmts
+-- Ignore standalone expressions (e.g., And, Or, etc.)
+processStmt table _ = table
 
 -- ///////////////////////////////////////////////
 -- Function to infer the type of an expression
