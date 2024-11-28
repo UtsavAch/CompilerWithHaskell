@@ -18,9 +18,9 @@ main = do
 
     -- Parse the tokens into an AST
     let parsedTree = parser tokens
-    -- putStrLn "---- PARSED TREE ----"
-    -- print parsedTree
-    -- putStrLn "--------------------------------"
+    putStrLn "---- PARSED TREE ----"
+    print parsedTree
+    putStrLn "--------------------------------"
 
     -- Build the symbol table from the AST
     let symbolTable = buildSymbolTable parsedTree [] 0
