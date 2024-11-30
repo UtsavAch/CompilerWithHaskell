@@ -13,6 +13,9 @@ import AST
 num                             { TNum $$ }
 "fun"                           { TFun }
 "main"                          { TMain }
+"Int"                           { TIntDec }
+"Bool"                          { TBoolDec }
+"String"                        { TStringDec }
 "+"                             { TPlus }
 "-"                             { TMinus }
 "*"                             { TMult }
@@ -49,6 +52,7 @@ num                             { TNum $$ }
 "!"                             { TNot }
 "||"                            { TOr }
 "&&"                            { TAnd }
+":"                             { TColon }
 string                          { TString $$ }
 id                              { TId $$ }
 
@@ -125,8 +129,12 @@ primary: num                                   { Num $1 }
        | "(" expr ")"                          { $2 }
        | string                                { String $1 }
 
-decl_stmt: "var" id "=" expr                   { Decl [Assign (Var $2) $4] }
-         | "val" id "=" expr                   { Decl [Assign (Val $2) $4] }
+Types : "Int"                                  { TyInt }
+      | "Bool"                                 { TyBool }
+      | "String"                               { TyString }
+
+decl_stmt: "var" id ":" Types "=" expr         { Decl $4 [Assign (Var $2) $6] }
+         | "val" id ":" Types "=" expr         { Decl $4 [Assign (Val $2) $6] }
 
 block_or_stmt: block                           { $1 }
         | stmt                                 { $1 }

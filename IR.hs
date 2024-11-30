@@ -28,8 +28,8 @@ data Instr
   | RETURN Temp                    -- return from a function
   | ATTRIARR Temp Temp Temp        -- temp = M[Atom]
   | INDEXARR Temp Temp Temp        -- M[Atom] = temp
-  | PRINTI Temp
-  | PRINTS Temp
+  | PRINT Temp
+  | PRINTLN Temp
   | SCAN Temp
   deriving (Eq, Show)
 

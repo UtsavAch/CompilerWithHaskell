@@ -18,6 +18,9 @@ $white+                                 ;  -- skip whitespace
 
 "fun"                           { \s -> TFun }
 "main"                          { \s -> TMain }
+"Int"                           { \s -> TIntDec }
+"Bool"                          { \s -> TBoolDec }
+"String"                        { \s -> TStringDec }
 "+"                             { \s -> TPlus }
 "-"                             { \s -> TMinus }
 "*"                             { \s -> TMult }
@@ -53,7 +56,8 @@ $white+                                 ;  -- skip whitespace
 "<="                            { \s -> TLessEq }
 "!"                             { \s -> TNot }
 "||"                            { \s -> TOr }
-"&&"                            { \s -> TAnd }          
+"&&"                            { \s -> TAnd } 
+":"                             { \s -> TColon }         
 \"[^\"]*\"                      { \s -> TString (init (tail s)) }
 [A-Za-z_][A-Za-z0-9_]*          { \s -> TId s }
 $digit+                         { \s -> TNum (read s) }
@@ -63,6 +67,9 @@ $digit+                         { \s -> TNum (read s) }
 data Token = TNum Int
             | TFun
             | TMain
+            | TIntDec
+            | TBoolDec
+            | TStringDec
             | TPlus 
             | TMinus 
             | TMult 

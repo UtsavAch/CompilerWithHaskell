@@ -19,7 +19,7 @@ data Exp = Num Int
         | Program Exp
         | Block [Exp]
 
-        | Decl [Exp]
+        | Decl Type [Exp]
 
         | Assign Exp Exp
 
@@ -43,3 +43,8 @@ data Exp = Num Int
         | Println Exp
         | Readln
         deriving Show 
+
+data Type = TyInt
+          | TyBool
+          | TyString
+          deriving Show

@@ -1,8 +1,8 @@
 fun main() {
-    var sum = 5 + 3
-    var check = true
-    var product = 7 * 4
-    var quotient = 20 / 4
-    var difference = 10 - 2
+    var sum : Int = 5 + 3
+    var check: Bool = true
+    var product: Int = 7 * 4
+    var quotient:Int = 20 / 4
+    var difference:Int = 10 - 2
     print("Sum: $sum, Product: $product, Quotient: $quotient, Difference: $difference")
 }

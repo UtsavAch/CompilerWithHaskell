@@ -183,10 +183,8 @@ transExpr (Not e) tabl dest = do
   code2 <- transExpr (Bool False) tabl dest
   return (code0 ++ [LABEL ltrue] ++ code1 ++ [JUMP lend, LABEL lfalse] ++ code2 ++ [LABEL lend])
 
--- /////////IMPORTANT///////////
--- transExpr (Scan) tabl dest = do
---   return [SCAN dest]
--- /////////////////////////////
+transExpr (Readln) tabl dest = do
+  return [SCAN dest]
 
 -- translate functions arguments
 -- each one gets a new temporary
@@ -253,21 +251,17 @@ transStm  (While cond stm) tabl =
 --   return code
 -- ////////////////////////////////
 
--- //////////IMPORTANT/////////////
--- transStm (PrintI e) table = do
---   temp1 <- newTemp
---   code1 <- transExpr e table temp1
---   reuseTemps 1
---   return (code1 ++ [PRINTI temp1])
--- ////////////////////////////////
+transStm (Print e) table = do
+  temp1 <- newTemp
+  code1 <- transExpr e table temp1
+  reuseTemps 1
+  return (code1 ++ [PRINT temp1])
 
--- //////////IMPORTANT/////////////
--- transStm (PrintS e) table = do
---   temp1 <- newTemp
---   code1 <- transExpr e table temp1
---   reuseTemps 1
---   return (code1 ++ [PRINTS temp1])
--- ////////////////////////////////
+transStm (Println e) table = do
+  temp1 <- newTemp
+  code1 <- transExpr e table temp1
+  reuseTemps 1
+  return (code1 ++ [PRINTLN temp1])
 
 -- translate a condition
 transCond :: Exp -> Table -> Label -> Label -> State Supply [Instr]
@@ -384,15 +378,22 @@ transStmList (stm:rest) tabl = do
 --   return (code1 ++ code2)
 -- /////////////////////////////////////
 
--- //////////// IMPORTANT //////////////////////
--- getDecs :: [Exp] -> [String]
--- getDecs ((Decl ty vars):rest) = (getDecsAux vars) ++ (getDecs rest)
--- getDecs [] = []
+-- //////////IMPORTANT/////////////
+-- transStm (Block decs body) table = do
+--   tdecs <- newTemps (length (getDecs decs))
+--   code <- transStmList body ((zip (getDecs decs) tdecs) ++ table)
+--   reuseTemps (length (getDecs decs))
+--   return code
+-- ////////////////////////////////
 
--- getDecsAux :: [Exp] -> [String]
--- getDecsAux ((Var str):rest) = str:(getDecsAux rest)
--- -- getDecsAux ((Array str nr):rest) = str:(getDecsAux rest)
--- getDecsAux [] = []
+-- //////////// IMPORTANT //////////////////////
+getDecs :: [Exp] -> [String]
+getDecs ((Decl ty vars):rest) = (getDecsAux vars) ++ (getDecs rest)
+getDecs [] = []
+
+getDecsAux :: [Exp] -> [String]
+getDecsAux ((Var str):rest) = str:(getDecsAux rest)
+getDecsAux [] = []
 -- ///////////////////////////////////////////////
 
 getVar :: Exp -> String

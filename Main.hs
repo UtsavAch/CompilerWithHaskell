@@ -26,13 +26,13 @@ main = do
     -- Tokenize the input
     let tokens = alexScanTokens txt
     -- putStrLn "---- TOKENS ----"
-    -- print tokens
+    print tokens
     -- putStrLn "--------------------------------"
 
     -- Parse the tokens into an AST
-    let parsedTree = parser tokens
+    -- let parsedTree = parser tokens
     putStrLn "---- PARSED TREE ----"
-    print parsedTree
+    -- print parsedTree
     putStrLn "--------------------------------"
 
     -- Build the symbol table from the AST
