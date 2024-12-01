@@ -30,9 +30,9 @@ main = do
     -- putStrLn "--------------------------------"
 
     -- Parse the tokens into an AST
-    -- let parsedTree = parser tokens
+    let parsedTree = parser $ alexScanTokens txt
     putStrLn "---- PARSED TREE ----"
-    -- print parsedTree
+    print parsedTree
     putStrLn "--------------------------------"
 
     -- Build the symbol table from the AST
@@ -51,3 +51,17 @@ printIR = mapM_ print
 --print an horizontal line
 line :: IO () 
 line = putStrLn (replicate 40 '-')
+
+
+-- //////////////////////////////////////
+-- module Main where
+
+-- import Lexer
+-- import Parser
+-- import AST
+
+-- main :: IO ()
+-- main = do
+--   txt <- getContents
+--   --print (alexScanTokens txt)
+--   print (parser $ alexScanTokens txt)

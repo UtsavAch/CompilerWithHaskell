@@ -1,8 +1,8 @@
 fun main() {
-    var maxTries = 3
-    var attempts = 0
-    var success = false
-    var abccccc = "bsajbckcs"
+    var maxTries : Int = 3
+    var attempts : Int = 0
+    var success : Bool = false
+    var abccccc : String = "bsajbckcs"
 
     while (attempts < maxTries) {        
         if (input == 1) {

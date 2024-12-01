@@ -24,10 +24,6 @@ data Instr
   | LABEL Label                   -- define label
   | JUMP Label                    -- unconditional jump
   | COND Temp BinOp Temp Label Label  -- conditional jump
-  | CALL Temp Label [Temp]         -- call a function
-  | RETURN Temp                    -- return from a function
-  | ATTRIARR Temp Temp Temp        -- temp = M[Atom]
-  | INDEXARR Temp Temp Temp        -- M[Atom] = temp
   | PRINT Temp
   | PRINTLN Temp
   | SCAN Temp

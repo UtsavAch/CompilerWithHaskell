@@ -72,6 +72,7 @@ block: "{" stmt_list "}"                       { Block $2 }
 
 stmt_list: stmt stmt_list                      { $1 : $2 }
           |                                    { [] }
+
 stmt: decl_stmt                                { $1 }
     | assign_stmt                              { $1 }
     | if_block_or_stmt                         { $1 }

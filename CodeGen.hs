@@ -58,9 +58,11 @@ transExpr (Num n) tabl dest
 transExpr (String s) tabl dest
   = return [MOVES dest s]
 
+-- ////May Need to Change/////////////
 transExpr (Bool b) tabl dest
   | b == True = return [MOVEI dest 1]
   | b == False = return [MOVEI dest 0]
+-- ///////////////////////////////////
 
 transExpr (Add e1 e2) tabl dest = do 
   temp1 <- newTemp 
@@ -186,18 +188,8 @@ transExpr (Not e) tabl dest = do
 transExpr (Readln) tabl dest = do
   return [SCAN dest]
 
--- translate functions arguments
--- each one gets a new temporary
-transArgs :: [Exp] -> Table -> State Supply ([Instr], [Temp])
-transArgs [] tabl = return ([], [])
-transArgs (exp:exps) tabl
-      = do temp <- newTemp 
-           code <- transExpr exp tabl temp 
-           (code', temps') <- transArgs exps tabl
-           return (code++code', temp:temps')
-
 -------------------------------------------------------------------------------------
-
+transStm :: Exp -> Table -> State Supply [Instr]
 transStm (Assign var expr) tabl
   = case lookup (getVar var) tabl of
       Nothing -> error "undefined variable"
@@ -244,11 +236,25 @@ transStm  (While cond stm) tabl =
      return ([LABEL lcond] ++ code1 ++ [LABEL lbody] ++ code2 ++ [JUMP lcond, LABEL lend])
 
 -- //////////IMPORTANT/////////////
+-- Don't know if it is CORRECT
+-- transStm (Block exps) table = do
+--   let decs = getDecs exps       -- Extract declarations from the expressions
+--   let body = drop (length decs) exps  -- Remaining expressions form the body
+--   tdecs <- newTemps (length decs)    -- Allocate temporary variables for declarations
+--   code <- transStmList body ((zip decs tdecs) ++ table)  -- Translate the body with extended symbol table
+--   reuseTemps (length decs)       -- Release the allocated temporaries
+--   return code
+
+transStm (Block body) tabl = do
+  code <- transStmList body tabl
+  return code
+
 -- transStm (Block decs body) table = do
 --   tdecs <- newTemps (length (getDecs decs))
 --   code <- transStmList body ((zip (getDecs decs) tdecs) ++ table)
 --   reuseTemps (length (getDecs decs))
 --   return code
+
 -- ////////////////////////////////
 
 transStm (Print e) table = do
@@ -352,39 +358,15 @@ transStmList (stm:rest) tabl = do
   code2 <- transStmList rest tabl
   return (code1 ++ code2)
   
--- translate a function definition
--- transFunDef :: Exp -> State Supply [Instr]
--- transFunDef (Func ty id args body) 
---   = do targs <- newTemps (length (getArgs args))      -- temporaries for arguments
---        -- setup symbol table
---        let table = (zip (getArgs args) targs)
---        -- translate the body
---        code <- transStm body table
---        reuseTemps (length(getArgs args))
---        -- return the code
---        return (LABEL id : code)
-
 -- ////////////IMPORTANT////////////////
--- transProg :: Exp -> State Supply [Instr]
--- transProg (Program funcs) = do
---   code <- transProgAux funcs
---   return (code)
-
--- transProgAux :: [Exp] -> State Supply [Instr]
--- transProgAux [] = return []
--- transProgAux (first:rest) = do
---   code1 <- transFunDef first
---   code2 <- transProgAux rest
---   return (code1 ++ code2)
+-- ///////////Need to be corrected//////
+transProg :: Exp -> State Supply [Instr]
+transProg (Program body) = do
+  -- Start with an empty symbol table
+  let initialTable = [] :: Table
+  -- Translate the list of statements in the program body
+  transStmList [body] initialTable
 -- /////////////////////////////////////
-
--- //////////IMPORTANT/////////////
--- transStm (Block decs body) table = do
---   tdecs <- newTemps (length (getDecs decs))
---   code <- transStmList body ((zip (getDecs decs) tdecs) ++ table)
---   reuseTemps (length (getDecs decs))
---   return code
--- ////////////////////////////////
 
 -- //////////// IMPORTANT //////////////////////
 getDecs :: [Exp] -> [String]
