@@ -28,7 +28,6 @@ num                             { TNum $$ }
 "print"                         { TPrint }
 "println"                       { TPrintln }
 "readln"                        { TReadln }
-"val"                           { TVal }
 "var"                           { TVar }
 "="                             { TAssign }
 "+="                            { TPlusAssign }
@@ -77,9 +76,9 @@ stmt: decl_stmt                                { $1 }
     | assign_stmt                              { $1 }
     | if_block_or_stmt                         { $1 }
     | while_stmt                               { $1 }
-    | expr_stmt                                { $1 }
+    | expr                                     { $1 }
 
-expr_stmt: expr                                { ExprStmt $1 }
+-- expr_stmt: expr                                { ExprStmt $1 }
 
 expr: or_expr                                  { $1 }
     | "readln" "(" ")"                         { Readln }
@@ -135,7 +134,6 @@ Types : "Int"                                  { TyInt }
       | "String"                               { TyString }
 
 decl_stmt: "var" id ":" Types "=" expr         { Decl $4 [Assign (Var $2) $6] }
-         | "val" id ":" Types "=" expr         { Decl $4 [Assign (Val $2) $6] }
 
 block_or_stmt: block                           { $1 }
         | stmt                                 { $1 }

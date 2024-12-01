@@ -7,6 +7,10 @@ import qualified Data.Map as Map
 import           Control.Monad.State (State)
 import qualified Control.Monad.State as State
 
+-- Unsolved ASTs
+-- ExprStmt
+-- /////////////
+
 -- symbol table:
 -- array identifiers to temporaries
 type Table = [(Ident, Temp)]
@@ -47,10 +51,10 @@ reuseTemps n
 
 -- translate an expression
 transExpr :: Exp -> Table -> Temp -> State Supply [Instr]
-transExpr (Var x) tabl dest
-  = case lookup x tabl of
-      Just temp -> return [MOVE dest temp]
-      Nothing -> error "undefined variable"
+transExpr (Var x) tabl dest =
+    case lookup x tabl of
+        Just temp -> return [MOVE dest temp]
+        Nothing -> error $ "Undefined variable: " ++ x
 
 transExpr (Num n) tabl dest 
   = return [MOVEI dest n]
@@ -237,24 +241,13 @@ transStm  (While cond stm) tabl =
 
 -- //////////IMPORTANT/////////////
 -- Don't know if it is CORRECT
--- transStm (Block exps) table = do
---   let decs = getDecs exps       -- Extract declarations from the expressions
---   let body = drop (length decs) exps  -- Remaining expressions form the body
---   tdecs <- newTemps (length decs)    -- Allocate temporary variables for declarations
---   code <- transStmList body ((zip decs tdecs) ++ table)  -- Translate the body with extended symbol table
---   reuseTemps (length decs)       -- Release the allocated temporaries
---   return code
-
 transStm (Block body) tabl = do
-  code <- transStmList body tabl
-  return code
-
--- transStm (Block decs body) table = do
---   tdecs <- newTemps (length (getDecs decs))
---   code <- transStmList body ((zip (getDecs decs) tdecs) ++ table)
---   reuseTemps (length (getDecs decs))
---   return code
-
+    let decs = getDecs body
+    tdecs <- newTemps (length decs)
+    let extendedTable = zip decs tdecs ++ tabl
+    code <- transStmList body extendedTable
+    reuseTemps (length decs)
+    return code
 -- ////////////////////////////////
 
 transStm (Print e) table = do
@@ -360,12 +353,17 @@ transStmList (stm:rest) tabl = do
   
 -- ////////////IMPORTANT////////////////
 -- ///////////Need to be corrected//////
+-- transProg :: Exp -> State Supply [Instr]
+-- transProg (Program body) = do
+--   -- Start with an empty symbol table
+--   let initialTable = [] :: Table
+--   -- Translate the list of statements in the program body
+--   transStmList [body] initialTable
+
 transProg :: Exp -> State Supply [Instr]
 transProg (Program body) = do
-  -- Start with an empty symbol table
-  let initialTable = [] :: Table
-  -- Translate the list of statements in the program body
-  transStmList [body] initialTable
+    let initialTable = []
+    transStm (Block [body]) initialTable
 -- /////////////////////////////////////
 
 -- //////////// IMPORTANT //////////////////////
@@ -380,3 +378,4 @@ getDecsAux [] = []
 
 getVar :: Exp -> String
 getVar (Var str) = str
+getVar _ = error "Expected a variable expression"

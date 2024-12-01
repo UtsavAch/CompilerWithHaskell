@@ -3,10 +3,7 @@ module AST where
 data Exp = Num Int
         | Bool Bool
         | Var String
-        | Val String
         | String String
-
-        | ExprStmt Exp
 
         | Add Exp Exp
         | Sub Exp Exp 
@@ -26,7 +23,6 @@ data Exp = Num Int
         | If Exp Exp
         | IfElse Exp Exp Exp
         | While Exp Exp
-        | For Exp Exp
 
         | Equal Exp Exp
         | NotEqual Exp Exp
