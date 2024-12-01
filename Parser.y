@@ -78,8 +78,6 @@ stmt: decl_stmt                                { $1 }
     | while_stmt                               { $1 }
     | expr                                     { $1 }
 
--- expr_stmt: expr                                { ExprStmt $1 }
-
 expr: or_expr                                  { $1 }
     | "readln" "(" ")"                         { Readln }
     | "print" "(" expr ")"                     { Print $3 }
@@ -101,7 +99,7 @@ and_expr: and_expr "&&" eq_expr                { And $1 $3 }
         | eq_expr                              { $1 }
 
 eq_expr: eq_expr "==" rel_expr                 { Equal $1 $3 }
-       | eq_expr "!=" rel_expr                 { NotEqual $1 $3 }
+       | eq_expr "!=" rel_expr                 { Diff $1 $3 }
        | rel_expr                              { $1 }
 
 rel_expr: rel_expr "<" add_expr                { Less $1 $3 }

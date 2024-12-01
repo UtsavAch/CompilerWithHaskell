@@ -7,7 +7,7 @@ fun main() {
     while (attempts < maxTries) {        
         if (input == 1) {
             success = 4
-            if(success == true) if(success == false) success = false else success = false
+            if(success != true) if(success == false) success = false else success = false
         } else {
             success = true
         }

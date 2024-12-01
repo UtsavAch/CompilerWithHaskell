@@ -34,6 +34,9 @@ main = do
     putStrLn "---- PARSED TREE ----"
     print parsedTree
     putStrLn "--------------------------------"
+    let inp = [Decl TyInt [Assign (Var "sum") (Add (Num 5) (Num 3))],Decl TyBool [Assign (Var "check") (Bool True)],Decl TyInt [Assign (Var "product") (Mult (Num 7) (Num 4))],Decl TyInt [Assign (Var "quotient") (Div (Num 20) (Num 4))],Decl TyInt [Assign (Var "difference") (Sub (Num 10) (Num 2))],Print (String "Sum: $sum, Product: $product, Quotient: $quotient, Difference: $difference")]    
+    let output = getDecs inp
+    print output
 
     -- Build the symbol table from the AST
     -- let symbolTable = buildSymbolTable parsedTree Map.empty

@@ -25,7 +25,6 @@ data Exp = Num Int
         | While Exp Exp
 
         | Equal Exp Exp
-        | NotEqual Exp Exp
         | Diff Exp Exp
         | Less Exp Exp
         | LessEq Exp Exp

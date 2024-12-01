@@ -1,9 +1,9 @@
 fun main() {
-    var a = true
-    var b = false
-    var andResult = a && b
-    var orResult = a || b
-    var notResult = !a
-    var eqRes = "a"=="a"
+    var a : Bool = true
+    var b : Bool = false
+    var andResult : Bool = a && b
+    var orResult : Bool = a || b
+    var notResult : Bool = !a
+    var eqRes : Bool = "a"=="a"
     print("AND: $andResult, OR: $orResult, NOT: $notResult")
 }

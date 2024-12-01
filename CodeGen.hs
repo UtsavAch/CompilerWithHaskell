@@ -241,13 +241,19 @@ transStm  (While cond stm) tabl =
 
 -- //////////IMPORTANT/////////////
 -- Don't know if it is CORRECT
-transStm (Block body) tabl = do
-    let decs = getDecs body
-    tdecs <- newTemps (length decs)
-    let extendedTable = zip decs tdecs ++ tabl
-    code <- transStmList body extendedTable
-    reuseTemps (length decs)
-    return code
+-- transStm (Block body) tabl = do
+--     let decs = getDecs body
+--     tdecs <- newTemps (length decs)
+--     let extendedTable = zip decs tdecs ++ tabl
+--     code <- transStmList body extendedTable
+--     reuseTemps (length decs)
+--     return code
+
+transStm (Block body) table = do
+  tdecs <- newTemps (length (getDecs body))
+  code <- transStmList body ((zip (getDecs body) tdecs) ++ table)
+  reuseTemps (length (getDecs body))
+  return code
 -- ////////////////////////////////
 
 transStm (Print e) table = do
@@ -261,6 +267,8 @@ transStm (Println e) table = do
   code1 <- transExpr e table temp1
   reuseTemps 1
   return (code1 ++ [PRINTLN temp1])
+
+transStm stm _ = error ("Unrecognized statement type: " ++ show stm)
 
 -- translate a condition
 transCond :: Exp -> Table -> Label -> Label -> State Supply [Instr]
@@ -352,28 +360,25 @@ transStmList (stm:rest) tabl = do
   return (code1 ++ code2)
   
 -- ////////////IMPORTANT////////////////
--- ///////////Need to be corrected//////
--- transProg :: Exp -> State Supply [Instr]
--- transProg (Program body) = do
---   -- Start with an empty symbol table
---   let initialTable = [] :: Table
---   -- Translate the list of statements in the program body
---   transStmList [body] initialTable
-
 transProg :: Exp -> State Supply [Instr]
 transProg (Program body) = do
-    let initialTable = []
+    let initialTable = [] :: Table
     transStm (Block [body]) initialTable
 -- /////////////////////////////////////
 
 -- //////////// IMPORTANT //////////////////////
 getDecs :: [Exp] -> [String]
-getDecs ((Decl ty vars):rest) = (getDecsAux vars) ++ (getDecs rest)
-getDecs [] = []
+getDecs (Decl _ [Assign (Var varName) _]:rest) = varName : getDecs rest
+getDecs (While _ block:rest) = getDecsBlock block ++ getDecs rest
+getDecs (IfElse _ block1 block2:rest) = getDecsBlock block1 ++ getDecsBlock block2 ++ getDecs rest
+getDecs (Block exps:rest) = getDecs exps ++ getDecs rest
+getDecs _ = []
 
-getDecsAux :: [Exp] -> [String]
-getDecsAux ((Var str):rest) = str:(getDecsAux rest)
-getDecsAux [] = []
+getDecsBlock :: Exp -> [String]
+getDecsBlock (Block exps) = getDecs exps
+
+-- Output is a list of declared variables
+-- e.g. ["sum","check","product","quotient","difference"]
 -- ///////////////////////////////////////////////
 
 getVar :: Exp -> String
