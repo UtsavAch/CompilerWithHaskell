@@ -13,4 +13,6 @@ fun main() {
         }
         attempts++
     }
+
+    var abf : String = "dn"
 }

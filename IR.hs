@@ -26,7 +26,7 @@ data Instr
   | COND Temp BinOp Temp Label Label  -- conditional jump
   | PRINT Temp
   | PRINTLN Temp
-  | SCAN Temp
+  | READ Temp
   deriving (Eq, Show)
 
 data BinOp

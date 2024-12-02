@@ -4,5 +4,6 @@ fun main() {
     var product: Int = 7 * 4
     var quotient:Int = 20 / 4
     var difference:Int = 10 - 2
-    print("Sum: $sum, Product: $product, Quotient: $quotient, Difference: $difference")
+    var myStr:String = "utsav"
+    print("The result")
 }

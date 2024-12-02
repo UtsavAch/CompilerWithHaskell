@@ -190,7 +190,7 @@ transExpr (Not e) tabl dest = do
   return (code0 ++ [LABEL ltrue] ++ code1 ++ [JUMP lend, LABEL lfalse] ++ code2 ++ [LABEL lend])
 
 transExpr (Readln) tabl dest = do
-  return [SCAN dest]
+  return [READ dest]
 
 -------------------------------------------------------------------------------------
 transStm :: Exp -> Table -> State Supply [Instr]
@@ -378,7 +378,7 @@ getDecsBlock :: Exp -> [String]
 getDecsBlock (Block exps) = getDecs exps
 
 -- Output is a list of declared variables
--- e.g. ["sum","check","product","quotient","difference"]
+-- e.g. ["sum","check","product","quotient","difference","abf"]
 -- ///////////////////////////////////////////////
 
 getVar :: Exp -> String
