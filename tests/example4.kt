@@ -1,5 +1,5 @@
 fun main() {
     print("Enter your name: ")
-    var name = readln()
+    var name: String = readln()
     print("Hello, $name!")
 }

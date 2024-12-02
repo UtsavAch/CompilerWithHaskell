@@ -33,18 +33,20 @@ transProg (Program (Block stmts)) = do
 transProg _ = error "Invalid program structure."
 
 -- Translate a block of expressions
+-- Translate a block of expressions
 transBlock :: [Exp] -> Table -> State Supply [Instr]
 transBlock [] _ = return []
 transBlock (stmt:rest) tabl = do
-    code1 <- transStmt stmt tabl
-    code2 <- transBlock rest tabl
+    (code1, updatedTable) <- transStmt stmt tabl
+    code2 <- transBlock rest updatedTable
     return (code1 ++ code2)
 
 -- Translate a single statement (Exp)
-transStmt :: Exp -> Table -> State Supply [Instr]
+-- Translate a single statement (Exp)
+transStmt :: Exp -> Table -> State Supply ([Instr], Table)
 transStmt (Decl _ assignments) tabl = do
-    (instrs, _) <- foldM processAssignment ([], tabl) assignments
-    return instrs
+    -- Fold over each assignment to generate instructions and update the symbol table
+    foldM processAssignment ([], tabl) assignments
   where
     processAssignment (instrs, tabl) (Assign (Var var) expr) = do
         temp <- newTemp
@@ -56,23 +58,48 @@ transStmt (Assign (Var var) expr) tabl = do
     temp <- case lookup var tabl of
         Just t -> return t
         Nothing -> error $ "Undefined variable: " ++ var
-    transExpr expr tabl temp
+    code <- transExpr expr tabl temp
+    return (code, tabl)
 
-transStmt (Print (String s)) _ = return [PRINT s]
-transStmt (Println (String s)) _ = return [PRINT s]
+transStmt (Print (String s)) tabl = return ([PRINT s], tabl)
+transStmt (Println (String s)) tabl = return ([PRINT s], tabl)
 
 transStmt _ _ = error "Unrecognized statement."
 
 -- Translate an expression
 transExpr :: Exp -> Table -> Temp -> State Supply [Instr]
 transExpr (Num n) _ dest = return [MOVEI dest n]
-transExpr (Bool b) _ dest = return [MOVEI dest (if b then 1 else 0)]
+transExpr (Bool b) _ dest = return [MOVEI dest (if b then 1 else 0)]  -- Boolean literal
+
 transExpr (Var x) tabl dest =
     case lookup x tabl of
         Just temp -> return [MOVE dest temp]
         Nothing -> error $ "Undefined variable: " ++ x
 
 transExpr (String s) _ dest = return [MOVES dest s]
+
+-- Handle Boolean expressions
+transExpr (And e1 e2) tabl dest = do
+    temp1 <- newTemp
+    temp2 <- newTemp
+    code1 <- transExpr e1 tabl temp1
+    code2 <- transExpr e2 tabl temp2
+    reuseTemps 2
+    return (code1 ++ code2 ++ [AND dest temp1 temp2])  -- AND operation
+
+transExpr (Or e1 e2) tabl dest = do
+    temp1 <- newTemp
+    temp2 <- newTemp
+    code1 <- transExpr e1 tabl temp1
+    code2 <- transExpr e2 tabl temp2
+    reuseTemps 2
+    return (code1 ++ code2 ++ [OR dest temp1 temp2])  -- OR operation
+
+transExpr (Not e) tabl dest = do
+    temp <- newTemp
+    code <- transExpr e tabl temp
+    reuseTemps 1
+    return (code ++ [NOT dest temp])  -- NOT operation
 
 transExpr (Add e1 e2) tabl dest = do
     temp1 <- newTemp
@@ -105,6 +132,5 @@ transExpr (Div e1 e2) tabl dest = do
     code2 <- transExpr e2 tabl temp2
     reuseTemps 2
     return (code1 ++ code2 ++ [DIV dest temp1 temp2])
-
 
 transExpr _ _ _ = error "Unsupported expression."
