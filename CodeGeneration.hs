@@ -94,6 +94,13 @@ transStmt (IfElse cond thenBlock elseBlock) tabl = do
     (codeElse, _) <- transBlock [elseBlock] tabl  -- Get code from the block
     return (codeCond ++ [LABEL ltrue] ++ codeThen ++ [JUMP lend, LABEL lfalse] ++ codeElse ++ [LABEL lend], tabl)
 
+transStmt (While cond body) tabl = do
+    lstart <- newLabel
+    lend <- newLabel
+    codeCond <- transCond cond tabl lstart lend
+    (codeBody, _) <- transBlock [body] tabl
+    return ([LABEL lstart] ++ codeCond ++ codeBody ++ [JUMP lstart, LABEL lend], tabl)
+
 transStmt _ _ = error "Unrecognized statement."
 
 
