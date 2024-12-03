@@ -1,6 +1,7 @@
 fun main() {
-    var x = 10
-    var y = 5
+    var x: Int = 10
+    var y: Int = 5
     x = x + y
+    y = x
     print("x: $x, y: $y")
 }

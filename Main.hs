@@ -43,8 +43,7 @@ main = do
     -- putStrLn "---- SYMBOL TABLE ----"
     -- print symbolTable
 
-    print("-------------------------")
-    print("Generated code")
+    print("------------Generated Code-------------")
     printIR (runCodeGen (transProg (parser $ alexScanTokens txt)))
 
 -- print a list of IR instructions

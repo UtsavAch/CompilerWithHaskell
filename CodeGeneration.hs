@@ -70,13 +70,15 @@ transStmt _ _ = error "Unrecognized statement."
 transExpr :: Exp -> Table -> Temp -> State Supply [Instr]
 transExpr (Num n) _ dest = return [MOVEI dest n]
 transExpr (Bool b) _ dest = return [MOVEI dest (if b then 1 else 0)]  -- Boolean literal
+transExpr (String s) _ dest = return [MOVES dest s]
 
 transExpr (Var x) tabl dest =
     case lookup x tabl of
         Just temp -> return [MOVE dest temp]
         Nothing -> error $ "Undefined variable: " ++ x
 
-transExpr (String s) _ dest = return [MOVES dest s]
+transExpr (Readln) tabl dest = do
+  return [READ dest]
 
 -- Handle Boolean expressions
 transExpr (And e1 e2) tabl dest = do
