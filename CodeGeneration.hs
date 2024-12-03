@@ -36,21 +36,19 @@ reuseTemps n = do
 transProg :: Exp -> State Supply [Instr]
 transProg (Program (Block stmts)) = do
     let initialTable = [] :: Table
-    transBlock stmts initialTable
+    (code, _) <- transBlock stmts initialTable
+    return code
 transProg _ = error "Invalid program structure."
 
--- Translate a block of expressions
-transBlock :: [Exp] -> Table -> State Supply [Instr]
-transBlock [] _ = return []
+-- Translate a block of statements
+transBlock :: [Exp] -> Table -> State Supply ([Instr], Table)
+transBlock [] tabl = return ([], tabl)
 transBlock (stmt:rest) tabl = do
     (code1, updatedTable) <- transStmt stmt tabl
-    code2 <- transBlock rest updatedTable
-    return (code1 ++ code2)
+    (code2, finalTable) <- transBlock rest updatedTable
+    return (code1 ++ code2, finalTable)
 
--- Translate a single statement (Exp)
-transStmt :: Exp -> Table -> State Supply ([Instr], Table)
 transStmt (Decl _ assignments) tabl = do
-    -- Fold over each assignment to generate instructions and update the symbol table
     foldM processAssignment ([], tabl) assignments
   where
     processAssignment (instrs, tabl) (Assign (Var var) expr) = do
@@ -76,7 +74,28 @@ transStmt (Println expr) tabl = do
     code <- transExpr expr tabl temp
     return (code ++ [PRINT temp], tabl)
 
+transStmt (Block stmts) tabl = do
+    (code, finalTable) <- transBlock stmts tabl
+    return (code, finalTable)
+
+transStmt (If cond thenBlock) tabl = do
+    ltrue <- newLabel
+    lfalse <- newLabel
+    codeCond <- transCond cond tabl ltrue lfalse
+    (codeThen, _) <- transBlock [thenBlock] tabl  -- Get code from the block
+    return (codeCond ++ [LABEL ltrue] ++ codeThen ++ [LABEL lfalse], tabl)
+
+transStmt (IfElse cond thenBlock elseBlock) tabl = do
+    ltrue <- newLabel
+    lfalse <- newLabel
+    lend <- newLabel
+    codeCond <- transCond cond tabl ltrue lfalse
+    (codeThen, _) <- transBlock [thenBlock] tabl  -- Get code from the block
+    (codeElse, _) <- transBlock [elseBlock] tabl  -- Get code from the block
+    return (codeCond ++ [LABEL ltrue] ++ codeThen ++ [JUMP lend, LABEL lfalse] ++ codeElse ++ [LABEL lend], tabl)
+
 transStmt _ _ = error "Unrecognized statement."
+
 
 -- Translate an expression
 transExpr :: Exp -> Table -> Temp -> State Supply [Instr]
@@ -147,4 +166,79 @@ transExpr (Div e1 e2) tabl dest = do
     reuseTemps 2
     return (code1 ++ code2 ++ [DIV dest temp1 temp2])
 
-transExpr _ _ _ = error "Unsupported expression."
+-- ---------------------------------------------------------
+-- Translate a condition
+transCond :: Exp -> Table -> Label -> Label -> State Supply [Instr]
+transCond (Less e1 e2) tabl ltrue lfalse = do
+    temp1 <- newTemp
+    temp2 <- newTemp
+    code1 <- transExpr e1 tabl temp1
+    code2 <- transExpr e2 tabl temp2
+    reuseTemps 2
+    return (code1 ++ code2 ++ [COND temp1 Lt temp2 ltrue lfalse])
+
+transCond (LessEq e1 e2) tabl ltrue lfalse = do
+    temp1 <- newTemp
+    temp2 <- newTemp
+    code1 <- transExpr e1 tabl temp1
+    code2 <- transExpr e2 tabl temp2
+    reuseTemps 2
+    return (code1 ++ code2 ++ [COND temp1 LtEq temp2 ltrue lfalse])
+
+transCond (Greater e1 e2) tabl ltrue lfalse = do
+    temp1 <- newTemp
+    temp2 <- newTemp
+    code1 <- transExpr e1 tabl temp1
+    code2 <- transExpr e2 tabl temp2
+    reuseTemps 2
+    return (code1 ++ code2 ++ [COND temp1 Gt temp2 ltrue lfalse])
+
+transCond (GreaterEq e1 e2) tabl ltrue lfalse = do
+    temp1 <- newTemp
+    temp2 <- newTemp
+    code1 <- transExpr e1 tabl temp1
+    code2 <- transExpr e2 tabl temp2
+    reuseTemps 2
+    return (code1 ++ code2 ++ [COND temp1 GtEq temp2 ltrue lfalse])
+
+transCond (Equal e1 e2) tabl ltrue lfalse = do
+    temp1 <- newTemp
+    temp2 <- newTemp
+    code1 <- transExpr e1 tabl temp1
+    code2 <- transExpr e2 tabl temp2
+    reuseTemps 2
+    return (code1 ++ code2 ++ [COND temp1 Eq temp2 ltrue lfalse])
+
+transCond (Diff e1 e2) tabl ltrue lfalse = do
+    temp1 <- newTemp
+    temp2 <- newTemp
+    code1 <- transExpr e1 tabl temp1
+    code2 <- transExpr e2 tabl temp2
+    reuseTemps 2
+    return (code1 ++ code2 ++ [COND temp1 Neq temp2 ltrue lfalse])
+
+transCond (Bool True) _ ltrue _ = return [JUMP ltrue]
+
+transCond (Bool False) _ _ lfalse = return [JUMP lfalse]
+
+transCond (Var v) tabl ltrue lfalse = do
+    temp <- case lookup v tabl of
+        Just t -> return t
+        Nothing -> error $ "Undefined variable: " ++ v
+    return [COND temp Eq temp ltrue lfalse]
+
+transCond (Not e) tabl ltrue lfalse = do
+    code <- transCond e tabl lfalse ltrue
+    return code
+
+transCond (And e1 e2) tabl ltrue lfalse = do
+    label2 <- newLabel
+    code1 <- transCond e1 tabl label2 lfalse
+    code2 <- transCond e2 tabl ltrue lfalse
+    return (code1 ++ [LABEL label2] ++ code2)
+
+transCond (Or e1 e2) tabl ltrue lfalse = do
+    label2 <- newLabel
+    code1 <- transCond e1 tabl ltrue label2
+    code2 <- transCond e2 tabl ltrue lfalse
+    return (code1 ++ [LABEL label2] ++ code2)
