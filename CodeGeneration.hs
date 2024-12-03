@@ -40,7 +40,6 @@ transProg (Program (Block stmts)) = do
 transProg _ = error "Invalid program structure."
 
 -- Translate a block of expressions
--- Translate a block of expressions
 transBlock :: [Exp] -> Table -> State Supply [Instr]
 transBlock [] _ = return []
 transBlock (stmt:rest) tabl = do
@@ -48,7 +47,6 @@ transBlock (stmt:rest) tabl = do
     code2 <- transBlock rest updatedTable
     return (code1 ++ code2)
 
--- Translate a single statement (Exp)
 -- Translate a single statement (Exp)
 transStmt :: Exp -> Table -> State Supply ([Instr], Table)
 transStmt (Decl _ assignments) tabl = do
@@ -68,8 +66,15 @@ transStmt (Assign (Var var) expr) tabl = do
     code <- transExpr expr tabl temp
     return (code, tabl)
 
-transStmt (Print (String s)) tabl = return ([PRINT s], tabl)
-transStmt (Println (String s)) tabl = return ([PRINT s], tabl)
+transStmt (Print expr) tabl = do
+    temp <- newTemp
+    code <- transExpr expr tabl temp
+    return (code ++ [PRINT temp], tabl)
+
+transStmt (Println expr) tabl = do
+    temp <- newTemp
+    code <- transExpr expr tabl temp
+    return (code ++ [PRINT temp], tabl)
 
 transStmt _ _ = error "Unrecognized statement."
 

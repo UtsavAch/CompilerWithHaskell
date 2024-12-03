@@ -3,8 +3,8 @@ fun main() {
     var b:Int = 10
 
     if (a < b) {
-        print("a is less than b")
+        print("a printed")
     } else {
-        print("a is not less than b")
+        print("b printed")
     }
 }
