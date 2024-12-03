@@ -166,6 +166,60 @@ transExpr (Div e1 e2) tabl dest = do
     reuseTemps 2
     return (code1 ++ code2 ++ [DIV dest temp1 temp2])
 
+transExpr (Equal e1 e2) tabl dest = do 
+  ltrue <- newLabel 
+  lfalse <- newLabel 
+  lend <- newLabel 
+  code0 <- transCond (Equal e1 e2) tabl  ltrue lfalse 
+  code1 <- transExpr (Bool True) tabl dest
+  code2 <- transExpr (Bool False) tabl dest
+  return (code0 ++ [LABEL ltrue] ++ code1 ++ [JUMP lend, LABEL lfalse] ++ code2 ++ [LABEL lend])
+
+transExpr (Diff e1 e2) tabl dest = do 
+  ltrue <- newLabel 
+  lfalse <- newLabel 
+  lend <- newLabel 
+  code0 <- transCond (Diff e1 e2) tabl  ltrue lfalse 
+  code1 <- transExpr (Bool True) tabl dest
+  code2 <- transExpr (Bool False) tabl dest
+  return (code0 ++ [LABEL ltrue] ++ code1 ++ [JUMP lend, LABEL lfalse] ++ code2 ++ [LABEL lend])
+
+transExpr (Less e1 e2) tabl dest = do 
+  ltrue <- newLabel 
+  lfalse <- newLabel 
+  lend <- newLabel 
+  code0 <- transCond (Less e1 e2) tabl  ltrue lfalse 
+  code1 <- transExpr (Bool True) tabl dest
+  code2 <- transExpr (Bool False) tabl dest
+  return (code0 ++ [LABEL ltrue] ++ code1 ++ [JUMP lend, LABEL lfalse] ++ code2 ++ [LABEL lend])
+
+transExpr (LessEq e1 e2) tabl dest = do 
+  ltrue <- newLabel 
+  lfalse <- newLabel 
+  lend <- newLabel 
+  code0 <- transCond (LessEq e1 e2) tabl  ltrue lfalse 
+  code1 <- transExpr (Bool True) tabl dest
+  code2 <- transExpr (Bool False) tabl dest
+  return (code0 ++ [LABEL ltrue] ++ code1 ++ [JUMP lend, LABEL lfalse] ++ code2 ++ [LABEL lend])
+
+transExpr (Greater e1 e2) tabl dest = do 
+  ltrue <- newLabel 
+  lfalse <- newLabel 
+  lend <- newLabel 
+  code0 <- transCond (Greater e1 e2) tabl  ltrue lfalse 
+  code1 <- transExpr (Bool True) tabl dest
+  code2 <- transExpr (Bool False) tabl dest
+  return (code0 ++ [LABEL ltrue] ++ code1 ++ [JUMP lend, LABEL lfalse] ++ code2 ++ [LABEL lend])
+
+transExpr (GreaterEq e1 e2) tabl dest = do 
+  ltrue <- newLabel 
+  lfalse <- newLabel 
+  lend <- newLabel 
+  code0 <- transCond (GreaterEq e1 e2) tabl  ltrue lfalse 
+  code1 <- transExpr (Bool True) tabl dest
+  code2 <- transExpr (Bool False) tabl dest
+  return (code0 ++ [LABEL ltrue] ++ code1 ++ [JUMP lend, LABEL lfalse] ++ code2 ++ [LABEL lend])
+
 -- ---------------------------------------------------------
 -- Translate a condition
 transCond :: Exp -> Table -> Label -> Label -> State Supply [Instr]
