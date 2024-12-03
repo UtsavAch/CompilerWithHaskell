@@ -33,7 +33,7 @@ data Exp = Num Int
         | Or Exp Exp
         | And Exp Exp
         | Not Exp
-
+        
         | Print Exp
         | Println Exp
         | Readln

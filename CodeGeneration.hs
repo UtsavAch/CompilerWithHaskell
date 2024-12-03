@@ -19,6 +19,13 @@ newTemp = do
     State.put (temps + 1, labels)
     return ("t" ++ show temps)
 
+-- get a new label
+newLabel :: State Supply Label 
+newLabel
+  = do (temps,labels) <- State.get
+       State.put (temps, labels+1)
+       return ("L"++show labels)
+
 -- Reuse temporaries by decrementing the counter
 reuseTemps :: Int -> State Supply ()
 reuseTemps n = do

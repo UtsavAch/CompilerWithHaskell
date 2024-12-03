@@ -1,7 +1,7 @@
 fun main() {
-    var count = 0
+    var count: Int = 0
     while (count < 5) {
         print("Count: $count ")
-        count++
+        count = count + 1
     }
 }
