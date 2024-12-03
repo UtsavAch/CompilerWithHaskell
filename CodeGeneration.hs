@@ -37,7 +37,7 @@ transProg :: Exp -> State Supply [Instr]
 transProg (Program (Block stmts)) = do
     let initialTable = [] :: Table
     (code, _) <- transBlock stmts initialTable
-    return code
+    return ([LABEL "main"] ++ code)  -- Add LABEL "main" at the start
 transProg _ = error "Invalid program structure."
 
 -- Translate a block of statements

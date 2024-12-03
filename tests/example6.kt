@@ -5,13 +5,13 @@ fun main() {
     var abccccc : String = "bsajbckcs"
 
     while (attempts < maxTries) {        
-        if (input == 1) {
+        if (maxTries == 1) {
             success = 4
             if(success != true) if(success == false) success = false else success = false
         } else {
             success = true
         }
-        attempts++
+        attempts = attempts + 1
     }
 
     var abf : String = "dn"
