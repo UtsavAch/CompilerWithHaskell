@@ -101,6 +101,22 @@ transStmt (While cond body) tabl = do
     (codeBody, _) <- transBlock [body] tabl
     return ([LABEL lstart] ++ codeCond ++ codeBody ++ [JUMP lstart, LABEL lend], tabl)
 
+transStmt (Incr e) tabl = do
+    temp1 <- newTemp
+    temp2 <- newTemp
+    code1 <- transExpr e tabl temp1
+    code2 <- transExpr (Num 1) tabl temp2
+    reuseTemps 2
+    return (code1 ++ code2 ++ [ADD temp1 temp1 temp2, MOVE (getVarTemp e tabl) temp1], tabl)
+
+transStmt (Decr e) tabl = do
+    temp1 <- newTemp
+    temp2 <- newTemp
+    code1 <- transExpr e tabl temp1
+    code2 <- transExpr (Num 1) tabl temp2
+    reuseTemps 2
+    return (code1 ++ code2 ++ [SUB temp1 temp1 temp2, MOVE (getVarTemp e tabl) temp1], tabl)
+
 transStmt _ _ = error "Unrecognized statement."
 
 
@@ -303,3 +319,11 @@ transCond (Or e1 e2) tabl ltrue lfalse = do
     code1 <- transCond e1 tabl ltrue label2
     code2 <- transCond e2 tabl ltrue lfalse
     return (code1 ++ [LABEL label2] ++ code2)
+
+-- Helper function to retrieve the temporary associated with a variable
+getVarTemp :: Exp -> Table -> Temp
+getVarTemp (Var x) tabl =
+    case lookup x tabl of
+        Just t  -> t
+        Nothing -> error $ "Undefined variable: " ++ x
+getVarTemp _ _ = error "Expected a variable expression."
