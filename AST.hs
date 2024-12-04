@@ -37,9 +37,9 @@ data Exp = Num Int
         | Print Exp
         | Println Exp
         | Readln
-        deriving Show 
+        deriving (Show, Eq)
 
 data Type = TyInt
           | TyBool
           | TyString
-          deriving Show
+          deriving (Show, Eq)
