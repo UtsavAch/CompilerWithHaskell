@@ -5,6 +5,7 @@ fun main() {
 
     if (z < 20) {
         println("z is less than 20")
+        z = "utsav"
     } else {
         println("z is not less than 20")
     }

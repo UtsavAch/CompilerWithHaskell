@@ -15,7 +15,7 @@ type SymbolTable = Map String Symbol
 
 -- Error types for semantic analysis
 data SemanticError
-    = TypeMismatch { expected :: String, actual :: String }
+    = TypeMismatch { varName :: String, expected :: String, actual :: String }
     | UndefinedVariable { varName :: String }
     | DuplicateDeclaration { varName :: String }
     deriving (Show)
@@ -49,7 +49,8 @@ processStmt (Right table) stmt = case stmt of
         let exprType = inferType expr table
         in if exprType == ty
             then insertSymbol table (Symbol name ty)
-            else Left $ TypeMismatch { expected = show ty, actual = show exprType }
+            else Left $ TypeMismatch { varName = name, expected = show ty, actual = show exprType }
+
 
     -- Handle assignments
     Assign (Var name) expr ->
@@ -58,7 +59,7 @@ processStmt (Right table) stmt = case stmt of
             Right symbol ->
                 if symbolType symbol == exprType
                     then Right table
-                    else Left $ TypeMismatch { expected = show (symbolType symbol), actual = show exprType }
+                    else Left $ TypeMismatch { varName = name, expected = show (symbolType symbol), actual = show exprType }
             Left err -> Left err
 
     -- Handle blocks with scoped symbol tables
