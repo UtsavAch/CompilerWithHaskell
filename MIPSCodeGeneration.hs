@@ -4,15 +4,22 @@ import IR
 
 -- Generate MIPS code from a list of IR instructions
 generateMIPS :: [Instr] -> String
-generateMIPS = unlines . map convertToMIPS
+generateMIPS instrs = 
+    ".data\n" ++ -- Start the data section for strings
+    concatMap generateData instrs ++
+    ".text\n" ++ -- Start the text section for executable code
+    unlines (map convertToMIPS instrs)
 
 -- Convert an individual IR instruction to MIPS code
 convertToMIPS :: Instr -> String
 convertToMIPS (MOVE t1 t2) = "move $" ++ t1 ++ ", $" ++ t2
 convertToMIPS (MOVEI t n) = "li $" ++ t ++ ", " ++ show n
-convertToMIPS (MOVES t str) = "la $a0, " ++ str ++ "\n" ++
-                             "li $v0, 4\n" ++
-                             "syscall"
+convertToMIPS (MOVES t str) = 
+    "la $a0, " ++ labelName ++ "\n" ++
+    "li $v0, 4\n" ++
+    "syscall"
+  where 
+    labelName = map (\c -> if c == ' ' then '_' else c) str
 convertToMIPS (ADD t1 t2 t3) = "add $" ++ t1 ++ ", $" ++ t2 ++ ", $" ++ t3
 convertToMIPS (SUB t1 t2 t3) = "sub $" ++ t1 ++ ", $" ++ t2 ++ ", $" ++ t3
 convertToMIPS (MULT t1 t2 t3) = "mul $" ++ t1 ++ ", $" ++ t2 ++ ", $" ++ t3
@@ -40,3 +47,10 @@ convertToMIPS (PRINTLN t) = "move $a0, $" ++ t ++ "\n" ++
 convertToMIPS (READ t) = "li $v0, 5\n" ++
                          "syscall\n" ++
                          "move $" ++ t ++ ", $v0"
+
+-- Generate MIPS code for data section (strings, constants, etc.)
+generateData :: Instr -> String
+generateData (MOVES _ str) = labelName ++ ": .asciiz \"" ++ str ++ "\"\n"
+  where 
+    labelName = map (\c -> if c == ' ' then '_' else c) str
+generateData _ = ""

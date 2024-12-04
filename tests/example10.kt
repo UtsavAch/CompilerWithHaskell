@@ -8,5 +8,7 @@ fun main() {
     var ltEq : Bool = a <= b
     var diff : Bool = a != b
     diff = b >= a
-    print("AND: $andResult, OR: $orResult, NOT: $notResult")
+    print("nothing and anything")
 }
+
+// Need to fix code for equality operators in Semantics

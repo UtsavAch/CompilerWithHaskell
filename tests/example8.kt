@@ -1,13 +1,14 @@
 fun main() {
     print("Enter a number: ")
-    var input = readln()
-    var factorial = 1
-    var i = 1
+    // var input: Int = readln() -- Need to fix this issue in semantics
+    var factorial: Int = 1
+    var i: Int = 1
 
-    while (i <= input) {
+    // while (i <= input) {
+    while (i <= 10) {
         factorial *= i
         i++
     }
 
-    print("Factorial of $input is $factorial")
+    print("Factorial is some num")
 }

@@ -35,13 +35,13 @@ main = do
     print parsedTree
 
     -- Build the symbol table from the AST
-    putStrLn "---- SYMBOL TABLE ----"
+    putStrLn "---- SEMANTICS CHECK ----"
     case buildSymbolTable parsedTree of
         Left err -> do
             putStrLn "Semantic Error:"
             print err
         Right symbolTable -> do
-            print symbolTable
+            print "No Semantic Error"
 
             -- Generate and print the IR code
             putStrLn "---- GENERATED CODE ----"
@@ -49,14 +49,9 @@ main = do
             printIR irCode
 
             -- Convert IR to MIPS code and print it
-            putStrLn "---- GENERATED MIPS CODE ----"
+            putStrLn "------- MIPS CODE -------"
             let mipsCode = generateMIPS irCode
             putStrLn mipsCode
-
-            -- Print the list of IR instructions
-            putStrLn "---- GENERATED CODE IN LIST----"
-            let instructions = linesToList irCode
-            print instructions
 
 -- print a list of IR instructions
 printIR :: [Instr] -> IO ()
@@ -65,7 +60,3 @@ printIR = mapM_ print
 -- print a horizontal line
 line :: IO ()
 line = putStrLn (replicate 40 '-')
-
--- Function to convert list of IR instructions to a simple list of strings
-linesToList :: Show a => [a] -> [String]
-linesToList input = map show input

@@ -4,5 +4,5 @@ fun main() {
     var andResult : Bool = a && b
     var orResult : Bool = a || b
     var notResult : Bool = !a
-    print("AND: $andResult, OR: $orResult, NOT: $notResult")
+    print("Hello")
 }

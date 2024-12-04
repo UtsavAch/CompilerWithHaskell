@@ -1,9 +1,9 @@
 fun main() {
-    var maxTries = 3
-    var attempts = 0
-    var success = false
-    var abccccc = "bsajbckcs"
-    var successMessage = "You entered a valid number!"
-    var errorMessage = "Invalid input, try again."
-    var finalMessage = "Thank you for following instructions."
+    var maxTries: Int = 3
+    var attempts: Int = 0
+    var success: Bool = false
+    var abccccc: String = "bsajbckcs"
+    var successMessage: String = "You entered a valid number!"
+    var errorMessage: String = "Invalid input, try again."
+    var finalMessage: String = "Thank you for following instructions."
 }
