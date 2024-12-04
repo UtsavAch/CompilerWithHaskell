@@ -6,6 +6,7 @@ import AST
 import Semantics
 import IR
 import CodeGeneration
+import MIPSCodeGeneration
 import qualified Data.Map as Map
 import Control.Monad.State (State)
 import qualified Control.Monad.State as State
@@ -47,6 +48,16 @@ main = do
             let irCode = runCodeGen (transProg parsedTree)
             printIR irCode
 
+            -- Convert IR to MIPS code and print it
+            putStrLn "---- GENERATED MIPS CODE ----"
+            let mipsCode = generateMIPS irCode
+            putStrLn mipsCode
+
+            -- Print the list of IR instructions
+            putStrLn "---- GENERATED CODE IN LIST----"
+            let instructions = linesToList irCode
+            print instructions
+
 -- print a list of IR instructions
 printIR :: [Instr] -> IO ()
 printIR = mapM_ print
@@ -54,3 +65,7 @@ printIR = mapM_ print
 -- print a horizontal line
 line :: IO ()
 line = putStrLn (replicate 40 '-')
+
+-- Function to convert list of IR instructions to a simple list of strings
+linesToList :: Show a => [a] -> [String]
+linesToList input = map show input
