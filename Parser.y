@@ -28,6 +28,7 @@ num                             { TNum $$ }
 "print"                         { TPrint }
 "println"                       { TPrintln }
 "readln"                        { TReadln }
+"return"                        { TReturn }
 "var"                           { TVar }
 "="                             { TAssign }
 "+="                            { TPlusAssign }
@@ -82,6 +83,7 @@ expr: or_expr                                  { $1 }
     | "readln" "(" ")"                         { Readln }
     | "print" "(" expr ")"                     { Print $3 }
     | "println" "(" expr ")"                   { Println $3 }
+    | "return"                                 { Return }
 
 assign_stmt: id "=" expr                       { Assign (Var $1) $3 }
            | id "+=" expr                      { Assign (Var $1) (Add (Var $1) $3) }

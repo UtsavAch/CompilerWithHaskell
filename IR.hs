@@ -27,6 +27,7 @@ data Instr
   | PRINT Temp
   | PRINTLN Temp
   | READ Temp
+  | RETURN Label
   deriving (Eq, Show)
 
 data BinOp

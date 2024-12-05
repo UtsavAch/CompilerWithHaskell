@@ -37,6 +37,7 @@ data Exp = Num Int
         | Print Exp
         | Println Exp
         | Readln
+        | Return
         deriving (Show, Eq)
 
 data Type = TyInt

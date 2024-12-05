@@ -33,6 +33,7 @@ $white+                                 ;  -- skip whitespace
 "print"                         { \s -> TPrint }
 "println"                       { \s -> TPrintln }
 "readln"                        { \s -> TReadln }
+"return"                        { \s -> TReturn }
 "var"                           { \s -> TVar}
 "="                             { \s -> TAssign }
 "+="                            { \s -> TPlusAssign }
@@ -81,6 +82,7 @@ data Token = TNum Int
             | TPrint 
             | TPrintln
             | TReadln 
+            | TReturn
             | TVar
             | TAssign 
             | TPlusAssign
