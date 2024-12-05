@@ -8,7 +8,7 @@ generateMIPS instrs =
     ".data\n" ++ -- Start the data section for strings
     concatMap generateData instrs ++
     ".text\n" ++ -- Start the text section for executable code
-    unlines (map convertToMIPS instrs)
+    unlines (map convertToMIPS instrs) ++ exitProgram -- Append the exit syscall
 
 -- Convert an individual IR instruction to MIPS code
 convertToMIPS :: Instr -> String
@@ -54,3 +54,7 @@ generateData (MOVES _ str) = labelName ++ ": .asciiz \"" ++ str ++ "\"\n"
   where 
     labelName = map (\c -> if c == ' ' then '_' else c) str
 generateData _ = ""
+
+-- Add a syscall for program termination
+exitProgram :: String
+exitProgram = "li $v0, 10\nsyscall"
