@@ -247,6 +247,8 @@ transExpr (GreaterEq e1 e2) tabl dest = do
   code2 <- transExpr (Bool False) tabl dest
   return (code0 ++ [LABEL ltrue] ++ code1 ++ [JUMP lend, LABEL lfalse] ++ code2 ++ [LABEL lend])
 
+transExpr _ _ _= error "Invalid expression."
+
 -- ---------------------------------------------------------
 -- Translate a condition
 transCond :: Exp -> Table -> Label -> Label -> State Supply [Instr]
@@ -323,6 +325,8 @@ transCond (Or e1 e2) tabl ltrue lfalse = do
     code1 <- transCond e1 tabl ltrue label2
     code2 <- transCond e2 tabl ltrue lfalse
     return (code1 ++ [LABEL label2] ++ code2)
+
+transCond _ _ _ _= error "Invalid condition."
 
 -- Helper function to retrieve the temporary associated with a variable
 getVarTemp :: Exp -> Table -> Temp
