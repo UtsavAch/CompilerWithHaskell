@@ -48,6 +48,13 @@ convertToMIPS stringTable (PRINT t) =
     "move $a0, $" ++ t ++ "\n" ++
     "li $v0, 1\n" ++
     "syscall"
+convertToMIPS stringTable (PRINTLN t) =
+    "move $a0, $" ++ t ++ "\n" ++
+    "li $v0, 1\n" ++
+    "syscall\n" ++
+    "la $a0, newline\n" ++
+    "li $v0, 4\n" ++
+    "syscall"
 convertToMIPS stringTable (READ t) =
     "li $v0, 5\n" ++
     "syscall\n" ++
@@ -55,7 +62,7 @@ convertToMIPS stringTable (READ t) =
 
 -- Generate MIPS data section and a string table
 generateData :: [Instr] -> StringTable -> (String, StringTable)
-generateData [] table = ("", table)
+generateData [] table = ("newline: .asciiz \"\\n\"\n", table) -- Include the newline in the data section
 generateData (MOVES _ str : rest) table =
     let labelName = fromMaybe ("str" ++ show (Map.size table)) (Map.lookup str table)
         newTable = Map.insert str labelName table

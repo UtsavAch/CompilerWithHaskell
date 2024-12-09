@@ -72,7 +72,7 @@ transStmt (Print expr) tabl = do
 transStmt (Println expr) tabl = do
     temp <- newTemp
     code <- transExpr expr tabl temp
-    return (code ++ [PRINT temp], tabl)
+    return (code ++ [PRINTLN temp], tabl)
 
 transStmt (Block stmts) tabl = do
     (code, finalTable) <- transBlock stmts tabl
