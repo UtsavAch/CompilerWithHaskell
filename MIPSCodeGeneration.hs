@@ -33,12 +33,12 @@ convertToMIPS (LABEL label) = label ++ ":"
 convertToMIPS (JUMP label) = "j " ++ label
 convertToMIPS (COND t1 binOp t2 label1 label2) = 
   case binOp of
-    Eq  -> "beq $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1
-    Neq -> "bne $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1
-    Lt  -> "blt $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1
-    LtEq -> "ble $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1
-    Gt  -> "bgt $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1
-    GtEq -> "bge $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1
+    Eq  -> "beq $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1 ++ "\nj " ++ label2
+    Neq -> "bne $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1 ++ "\nj " ++ label2
+    Lt  -> "blt $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1 ++ "\nj " ++ label2
+    LtEq -> "ble $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1 ++ "\nj " ++ label2
+    Gt  -> "bgt $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1 ++ "\nj " ++ label2
+    GtEq -> "bge $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1 ++ "\nj " ++ label2
 convertToMIPS (PRINT t) = 
     "move $a0, $" ++ t ++ "\n" ++
     "li $v0, 1\n" ++
