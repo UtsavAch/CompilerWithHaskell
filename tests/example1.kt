@@ -5,5 +5,7 @@ fun main() {
     var quotient:Int = 20 / 4
     var difference:Int = 10 - 2
     var myStr:String = "utsav"
-    print("kefbk")
+    print(sum)
+    print(check)
+    print(myStr)
 }

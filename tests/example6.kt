@@ -6,13 +6,11 @@ fun main() {
 
     while (attempts < maxTries) {        
         if (maxTries == 1) {
-            success = 4
             if(success != true) if(success == false) success = false else success = false
         } else {
             success = true
         }
+        print(success)
         attempts = attempts + 1
     }
-
-    var abf : String = "dn"
 }

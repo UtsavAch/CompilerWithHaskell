@@ -5,10 +5,11 @@ import IR
 -- Generate MIPS code from a list of IR instructions
 generateMIPS :: [Instr] -> String
 generateMIPS instrs = 
-    ".data\n" ++ -- Start the data section for strings
+    ".data\n" ++
     concatMap generateData instrs ++
-    ".text\n" ++ -- Start the text section for executable code
-    unlines (map convertToMIPS instrs) ++ exitProgram -- Append the exit syscall
+    ".text\n" ++
+    unlines (map convertToMIPS instrs) ++
+    exitProgram
 
 -- Convert an individual IR instruction to MIPS code
 convertToMIPS :: Instr -> String
@@ -19,7 +20,7 @@ convertToMIPS (MOVES t str) =
     "li $v0, 4\n" ++
     "syscall"
   where 
-    labelName = map (\c -> if c == ' ' then '_' else c) str
+    labelName = sanitizeString str
 convertToMIPS (ADD t1 t2 t3) = "add $" ++ t1 ++ ", $" ++ t2 ++ ", $" ++ t3
 convertToMIPS (SUB t1 t2 t3) = "sub $" ++ t1 ++ ", $" ++ t2 ++ ", $" ++ t3
 convertToMIPS (MULT t1 t2 t3) = "mul $" ++ t1 ++ ", $" ++ t2 ++ ", $" ++ t3
@@ -38,23 +39,29 @@ convertToMIPS (COND t1 binOp t2 label1 label2) =
     LtEq -> "ble $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1
     Gt  -> "bgt $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1
     GtEq -> "bge $" ++ t1 ++ ", $" ++ t2 ++ ", " ++ label1
-convertToMIPS (PRINT t) = "move $a0, $" ++ t ++ "\n" ++
-                          "li $v0, 1\n" ++
-                          "syscall"
-convertToMIPS (PRINTLN t) = "move $a0, $" ++ t ++ "\n" ++
-                            "li $v0, 4\n" ++
-                            "syscall"
-convertToMIPS (READ t) = "li $v0, 5\n" ++
-                         "syscall\n" ++
-                         "move $" ++ t ++ ", $v0"
+convertToMIPS (PRINT t) = 
+    "move $a0, $" ++ t ++ "\n" ++
+    "li $v0, 1\n" ++
+    "syscall"
+convertToMIPS (PRINTLN t) = 
+    "move $a0, $" ++ t ++ "\n" ++
+    "li $v0, 4\n" ++
+    "syscall"
+convertToMIPS (READ t) = 
+    "li $v0, 5\n" ++
+    "syscall\n" ++
+    "move $" ++ t ++ ", $v0"
 
 -- Generate MIPS code for data section (strings, constants, etc.)
 generateData :: Instr -> String
-generateData (MOVES _ str) = labelName ++ ": .asciiz \"" ++ str ++ "\"\n"
-  where 
-    labelName = map (\c -> if c == ' ' then '_' else c) str
+generateData (MOVES _ str) = sanitizeString str ++ ": .asciiz \"" ++ str ++ "\"\n"
 generateData _ = ""
+
+-- Helper function to sanitize string labels
+sanitizeString :: String -> String
+sanitizeString = map (\c -> if c == ' ' then '_' else c)
 
 -- Add a syscall for program termination
 exitProgram :: String
-exitProgram = "li $v0, 10\nsyscall"
+exitProgram = 
+    "li $v0, 10\nsyscall\n"

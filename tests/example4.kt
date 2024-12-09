@@ -4,9 +4,8 @@ fun main() {
     var z: Int = x + y
 
     if (z < 20) {
-        println("z is less than 20")
-        z = "utsav"
+        println(13)
     } else {
-        println("z is not less than 20")
+        println(y)
     }
 }
