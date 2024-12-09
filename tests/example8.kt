@@ -1,5 +1,5 @@
 fun main() {
-    print("Enter a number: ")
+    print("Enter a number")
     // var input: Int = readln() -- Need to fix this issue in semantics
     var factorial: Int = 1
     var i: Int = 1

@@ -98,11 +98,12 @@ transStmt (Return) tabl = do
     return ([JUMP "end"], tabl)
 
 transStmt (While cond body) tabl = do
+    ltop <- newLabel
     lstart <- newLabel
     lend <- newLabel
     codeCond <- transCond cond tabl lstart lend
     (codeBody, _) <- transBlock [body] tabl
-    return ([LABEL lstart] ++ codeCond ++ codeBody ++ [JUMP lstart, LABEL lend], tabl)
+    return ([LABEL ltop] ++ codeCond ++ [LABEL lstart] ++ codeBody ++ [JUMP ltop, LABEL lend], tabl)
 
 transStmt (Incr e) tabl = do
     temp1 <- newTemp
