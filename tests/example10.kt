@@ -10,5 +10,3 @@ fun main() {
     diff = b >= a
     print("nothing and anything")
 }
-
-// Need to fix code for equality operators in Semantics

@@ -34,14 +34,14 @@ main = do
     putStrLn "---- PARSED TREE ----"
     print parsedTree
 
-    -- Build the symbol table from the AST
+    -- Perform semantic analysis
     putStrLn "---- SEMANTICS CHECK ----"
-    case buildSymbolTable parsedTree of
+    case semanticAnalysis Map.empty parsedTree of
         Left err -> do
             putStrLn "Semantic Error:"
-            print err
+            putStrLn err
         Right symbolTable -> do
-            print "No Semantic Error"
+            putStrLn "No Semantic Error"
 
             -- Generate and print the IR code
             putStrLn "---- GENERATED CODE ----"

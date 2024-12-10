@@ -1,109 +1,117 @@
 module Semantics where
 
-import AST
 import qualified Data.Map as Map
-import Data.Map (Map)
+import AST
 
--- Data type for a symbol
-data Symbol = Symbol {
-    symbolName :: String,
-    symbolType :: Type
-} deriving (Show, Eq)
+-- Symbol table maps variable names to their types
+type SymbolTable = Map.Map String Type
 
--- Symbol table as a Map
-type SymbolTable = Map String Symbol
+-- Perform semantic analysis on a program by traversing the AST
+semanticAnalysis :: SymbolTable -> Exp -> Either String SymbolTable
+semanticAnalysis symTable (Program block) = analyzeBlock symTable block
 
--- Error types for semantic analysis
-data SemanticError
-    = TypeMismatch { varName :: String, expected :: String, actual :: String }
-    | UndefinedVariable { varName :: String }
-    | DuplicateDeclaration { varName :: String }
-    deriving (Show)
+-- Analyze a block of statements
+analyzeBlock :: SymbolTable -> Exp -> Either String SymbolTable
+analyzeBlock symTable (Block stmts) = analyzeStatements symTable stmts
 
--- Insert a new symbol into the table
-insertSymbol :: SymbolTable -> Symbol -> Either SemanticError SymbolTable
-insertSymbol table symbol =
-    if Map.member (symbolName symbol) table
-        then Left $ DuplicateDeclaration (symbolName symbol)
-        else Right $ Map.insert (symbolName symbol) symbol table
+-- Analyze a list of statements
+analyzeStatements :: SymbolTable -> [Exp] -> Either String SymbolTable
+analyzeStatements symTable [] = Right symTable
+analyzeStatements symTable (stmt:rest) = do
+    updatedSymTable <- analyzeStatement symTable stmt
+    analyzeStatements updatedSymTable rest
 
--- Lookup a symbol by name
-lookupSymbol :: SymbolTable -> String -> Either SemanticError Symbol
-lookupSymbol table name =
-    case Map.lookup name table of
-        Just symbol -> Right symbol
-        Nothing -> Left $ UndefinedVariable name
+-- Analyze a single statement
+analyzeStatement :: SymbolTable -> Exp -> Either String SymbolTable
+analyzeStatement symTable (Decl varType [Assign (Var name) expr]) = do
+    if Map.member name symTable
+        then Left $ "Variable '" ++ name ++ "' is already declared."
+        else do
+            exprType <- inferExpressionType symTable expr
+            if exprType /= varType
+                then Left $ "Type mismatch in declaration of variable '" ++ name ++ "'. Expected type " ++ show varType ++ ", but got " ++ show exprType
+                else Right $ Map.insert name varType symTable
 
--- Function to construct the symbol table from the AST
-buildSymbolTable :: Exp -> Either SemanticError SymbolTable
-buildSymbolTable (Program (Block stmts)) =
-    foldl processStmt (Right Map.empty) stmts
-buildSymbolTable _ = Right Map.empty
+analyzeStatement symTable (Assign (Var name) expr) = do
+    case Map.lookup name symTable of
+        Nothing -> Left $ "Variable '" ++ name ++ "' is not declared before assignment."
+        Just varType -> do
+            exprType <- inferExpressionType symTable expr
+            if exprType /= varType
+                then Left $ "Type mismatch in assignment to variable '" ++ name ++ "'. Expected type " ++ show varType ++ ", but got " ++ show exprType
+                else Right symTable
 
--- Function to process statements and include type checking
-processStmt :: Either SemanticError SymbolTable -> Exp -> Either SemanticError SymbolTable
-processStmt (Left err) _ = Left err
-processStmt (Right table) stmt = case stmt of
-    -- Handle variable declarations with assignments
-    Decl ty [Assign (Var name) expr] ->
-        let exprType = inferType expr table
-        in if exprType == ty
-            then insertSymbol table (Symbol name ty)
-            else Left $ TypeMismatch { varName = name, expected = show ty, actual = show exprType }
+analyzeStatement symTable (If cond thenBranch) = do
+    condType <- inferExpressionType symTable cond
+    if condType /= TyBool
+        then Left "Condition in 'if' must evaluate to a boolean."
+        else analyzeBlock symTable thenBranch
 
+analyzeStatement symTable (IfElse cond thenBranch elseBranch) = do
+    condType <- inferExpressionType symTable cond
+    if condType /= TyBool
+        then Left "Condition in 'if-else' must evaluate to a boolean."
+        else do
+            symTableThen <- analyzeBlock symTable thenBranch
+            symTableElse <- analyzeBlock symTable elseBranch
+            Right symTable
 
-    -- Handle assignments
-    Assign (Var name) expr ->
-        let exprType = inferType expr table
-        in case lookupSymbol table name of
-            Right symbol ->
-                if symbolType symbol == exprType
-                    then Right table
-                    else Left $ TypeMismatch { varName = name, expected = show (symbolType symbol), actual = show exprType }
-            Left err -> Left err
+analyzeStatement symTable (While cond body) = do
+    condType <- inferExpressionType symTable cond
+    if condType /= TyBool
+        then Left "Condition in 'while' must evaluate to a boolean."
+        else analyzeBlock symTable body
 
-    -- Handle blocks with scoped symbol tables
-    Block stmts -> foldl processStmt (Right table) stmts
+analyzeStatement symTable (Println expr) = inferExpressionType symTable expr >> Right symTable
+analyzeStatement symTable (Print expr) = inferExpressionType symTable expr >> Right symTable
+analyzeStatement _ _ = Left "Unsupported statement encountered in semantic analysis."
 
-    -- Ignore standalone expressions
-    _ -> Right table
+-- Infer the type of expressions
+inferExpressionType :: SymbolTable -> Exp -> Either String Type
+inferExpressionType symTable (Num _) = Right TyInt
+inferExpressionType symTable (Bool _) = Right TyBool
+inferExpressionType symTable (String _) = Right TyString
+inferExpressionType symTable (Var name) = 
+    maybe (Left $ "Variable '" ++ name ++ "' is used without declaration.") Right (Map.lookup name symTable)
+inferExpressionType symTable (Add e1 e2) = checkArithmetic symTable e1 e2
+inferExpressionType symTable (Sub e1 e2) = checkArithmetic symTable e1 e2
+inferExpressionType symTable (Mult e1 e2) = checkArithmetic symTable e1 e2
+inferExpressionType symTable (Div e1 e2) = checkArithmetic symTable e1 e2
+inferExpressionType symTable (And e1 e2) = checkLogical symTable e1 e2
+inferExpressionType symTable (Or e1 e2) = checkLogical symTable e1 e2
+inferExpressionType symTable (Not e) = do
+    t <- inferExpressionType symTable e
+    if t /= TyBool
+        then Left "'!' operator can only operate on boolean expressions."
+        else Right TyBool
+inferExpressionType symTable (Less e1 e2) = checkComparison symTable e1 e2
+inferExpressionType symTable (Greater e1 e2) = checkComparison symTable e1 e2
+inferExpressionType symTable (Equal e1 e2) = checkComparison symTable e1 e2
+inferExpressionType symTable (Diff e1 e2) = checkComparison symTable e1 e2
+inferExpressionType symTable (LessEq e1 e2) = checkComparison symTable e1 e2
+inferExpressionType symTable (GreaterEq e1 e2) = checkComparison symTable e1 e2
 
--- Function to infer the type of an expression
-inferType :: Exp -> SymbolTable -> Type
--- Base cases
-inferType (Num _) _ = TyInt
-inferType (Bool _) _ = TyBool
-inferType (String _) _ = TyString
+-- Helper functions
+checkLogical, checkArithmetic, checkComparison ::
+    SymbolTable -> Exp -> Exp -> Either String Type
 
--- Lookup variables in the symbol table
-inferType (Var name) table =
-    case lookupSymbol table name of
-        Right symbol -> symbolType symbol
-        Left _ -> error $ "Undefined variable: " ++ name
+checkLogical symTable e1 e2 = do
+    t1 <- inferExpressionType symTable e1
+    t2 <- inferExpressionType symTable e2
+    if t1 == TyBool && t2 == TyBool
+        then Right TyBool
+        else Left "Logical operators can only operate on boolean expressions."
 
--- Logical and arithmetic operations
-inferType (And e1 e2) table = checkBinaryOp e1 e2 TyBool table
-inferType (Or e1 e2) table = checkBinaryOp e1 e2 TyBool table
-inferType (Not e) table = checkUnaryOp e TyBool table
+checkArithmetic symTable e1 e2 = do
+    t1 <- inferExpressionType symTable e1
+    t2 <- inferExpressionType symTable e2
+    if t1 == TyInt && t2 == TyInt
+        then Right TyInt
+        else Left "Arithmetic operators can only operate on integers."
 
-inferType (Add e1 e2) table = checkBinaryOp e1 e2 TyInt table
-inferType (Sub e1 e2) table = checkBinaryOp e1 e2 TyInt table
-inferType (Div e1 e2) table = checkBinaryOp e1 e2 TyInt table
-inferType (Mult e1 e2) table = checkBinaryOp e1 e2 TyInt table
-
--- Default case
-inferType _ _ = error "Unknown type"
-
--- Helper for binary operations
-checkBinaryOp :: Exp -> Exp -> Type -> SymbolTable -> Type
-checkBinaryOp e1 e2 expectedType table =
-    if inferType e1 table == expectedType && inferType e2 table == expectedType
-    then expectedType
-    else error "Type mismatch in binary operation"
-
--- Helper for unary operations
-checkUnaryOp :: Exp -> Type -> SymbolTable -> Type
-checkUnaryOp e expectedType table =
-    if inferType e table == expectedType
-    then expectedType
-    else error "Type mismatch in unary operation"
+checkComparison symTable e1 e2 = do
+    t1 <- inferExpressionType symTable e1
+    t2 <- inferExpressionType symTable e2
+    if t1 == t2
+        then Right TyBool
+        else Left "Comparison can only compare expressions of the same type."

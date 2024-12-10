@@ -10,6 +10,4 @@ fun main() {
     } else {
         success = true
     }
-
-    var abf : String = "dn"
 }

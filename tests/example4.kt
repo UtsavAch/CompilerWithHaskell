@@ -7,5 +7,6 @@ fun main() {
         println(13)
     } else {
         println(y)
+        z = false
     }
 }
