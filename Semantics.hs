@@ -9,10 +9,12 @@ type SymbolTable = Map.Map String Type
 -- Perform semantic analysis on a program by traversing the AST
 semanticAnalysis :: SymbolTable -> Exp -> Either String SymbolTable
 semanticAnalysis symTable (Program block) = analyzeBlock symTable block
+semanticAnalysis _ _ = Left "Top-level program structure must be a block."
 
 -- Analyze a block of statements
 analyzeBlock :: SymbolTable -> Exp -> Either String SymbolTable
 analyzeBlock symTable (Block stmts) = analyzeStatements symTable stmts
+analyzeBlock _ _ = Left "Expected a block of statements but received a different expression."
 
 -- Analyze a list of statements
 analyzeStatements :: SymbolTable -> [Exp] -> Either String SymbolTable
@@ -30,7 +32,8 @@ analyzeStatement symTable (Decl varType [Assign (Var name) expr]) = do
         else do
             exprType <- inferExpressionType symTable expr
             if exprType /= varType
-                then Left $ "Type mismatch in declaration of variable '" ++ name ++ "'. Expected type " ++ show varType ++ ", but got " ++ show exprType
+                then Left $ "Type mismatch in declaration of variable '" ++ name ++ 
+                            "'. Expected type " ++ show varType ++ ", but got " ++ show exprType
                 else Right $ Map.insert name varType symTable
 
 -- Handle assignment
@@ -40,7 +43,8 @@ analyzeStatement symTable (Assign (Var name) expr) = do
         Just varType -> do
             exprType <- inferExpressionType symTable expr
             if exprType /= varType
-                then Left $ "Type mismatch in assignment to variable '" ++ name ++ "'. Expected type " ++ show varType ++ ", but got " ++ show exprType
+                then Left $ "Type mismatch in assignment to variable '" ++ name ++ 
+                            "'. Expected type " ++ show varType ++ ", but got " ++ show exprType
                 else Right symTable
 
 -- Handle increment (i++)
@@ -49,16 +53,18 @@ analyzeStatement symTable (Incr (Var name)) = do
         Nothing -> Left $ "Variable '" ++ name ++ "' is not declared before increment."
         Just varType ->
             if varType /= TyInt
-                then Left $ "Increment operation is only valid for integers, but variable '" ++ name ++ "' has type " ++ show varType
+                then Left $ "Increment operation is only valid for integers, but variable '" ++ 
+                            name ++ "' has type " ++ show varType
                 else Right symTable
 
 -- Handle decrement (i--)
 analyzeStatement symTable (Decr (Var name)) = do
     case Map.lookup name symTable of
-        Nothing -> Left $ "Variable '" ++ name ++ "' is not declared before increment."
+        Nothing -> Left $ "Variable '" ++ name ++ "' is not declared before decrement."
         Just varType ->
             if varType /= TyInt
-                then Left $ "Decrement operation is only valid for integers, but variable '" ++ name ++ "' has type " ++ show varType
+                then Left $ "Decrement operation is only valid for integers, but variable '" ++ 
+                            name ++ "' has type " ++ show varType
                 else Right symTable
 
 -- Handle if statement
@@ -66,7 +72,7 @@ analyzeStatement symTable (If cond thenBranch) = do
     condType <- inferExpressionType symTable cond
     if condType /= TyBool
         then Left "Condition in 'if' must evaluate to a boolean."
-        else analyzeBlock symTable thenBranch
+        else analyzeBlockOrStatement symTable thenBranch
 
 -- Handle if-else statement
 analyzeStatement symTable (IfElse cond thenBranch elseBranch) = do
@@ -74,8 +80,8 @@ analyzeStatement symTable (IfElse cond thenBranch elseBranch) = do
     if condType /= TyBool
         then Left "Condition in 'if-else' must evaluate to a boolean."
         else do
-            symTableThen <- analyzeBlock symTable thenBranch
-            symTableElse <- analyzeBlock symTable elseBranch
+            _ <- analyzeBlockOrStatement symTable thenBranch
+            _ <- analyzeBlockOrStatement symTable elseBranch
             Right symTable
 
 -- Handle while loop
@@ -91,6 +97,11 @@ analyzeStatement symTable (Print expr) = inferExpressionType symTable expr >> Ri
 
 -- Catch unsupported or unrecognized statements
 analyzeStatement _ _ = Left "Unsupported statement encountered in semantic analysis."
+
+-- Handle both blocks and single statements in branches
+analyzeBlockOrStatement :: SymbolTable -> Exp -> Either String SymbolTable
+analyzeBlockOrStatement symTable (Block stmts) = analyzeStatements symTable stmts
+analyzeBlockOrStatement symTable stmt = analyzeStatement symTable stmt
 
 -- Infer the type of expressions
 inferExpressionType :: SymbolTable -> Exp -> Either String Type
