@@ -23,6 +23,7 @@ analyzeStatements symTable (stmt:rest) = do
 
 -- Analyze a single statement
 analyzeStatement :: SymbolTable -> Exp -> Either String SymbolTable
+-- Handle variable declaration with initialization
 analyzeStatement symTable (Decl varType [Assign (Var name) expr]) = do
     if Map.member name symTable
         then Left $ "Variable '" ++ name ++ "' is already declared."
@@ -32,6 +33,7 @@ analyzeStatement symTable (Decl varType [Assign (Var name) expr]) = do
                 then Left $ "Type mismatch in declaration of variable '" ++ name ++ "'. Expected type " ++ show varType ++ ", but got " ++ show exprType
                 else Right $ Map.insert name varType symTable
 
+-- Handle assignment
 analyzeStatement symTable (Assign (Var name) expr) = do
     case Map.lookup name symTable of
         Nothing -> Left $ "Variable '" ++ name ++ "' is not declared before assignment."
@@ -41,12 +43,32 @@ analyzeStatement symTable (Assign (Var name) expr) = do
                 then Left $ "Type mismatch in assignment to variable '" ++ name ++ "'. Expected type " ++ show varType ++ ", but got " ++ show exprType
                 else Right symTable
 
+-- Handle increment (i++)
+analyzeStatement symTable (Incr (Var name)) = do
+    case Map.lookup name symTable of
+        Nothing -> Left $ "Variable '" ++ name ++ "' is not declared before increment."
+        Just varType ->
+            if varType /= TyInt
+                then Left $ "Increment operation is only valid for integers, but variable '" ++ name ++ "' has type " ++ show varType
+                else Right symTable
+
+-- Handle decrement (i--)
+analyzeStatement symTable (Decr (Var name)) = do
+    case Map.lookup name symTable of
+        Nothing -> Left $ "Variable '" ++ name ++ "' is not declared before increment."
+        Just varType ->
+            if varType /= TyInt
+                then Left $ "Decrement operation is only valid for integers, but variable '" ++ name ++ "' has type " ++ show varType
+                else Right symTable
+
+-- Handle if statement
 analyzeStatement symTable (If cond thenBranch) = do
     condType <- inferExpressionType symTable cond
     if condType /= TyBool
         then Left "Condition in 'if' must evaluate to a boolean."
         else analyzeBlock symTable thenBranch
 
+-- Handle if-else statement
 analyzeStatement symTable (IfElse cond thenBranch elseBranch) = do
     condType <- inferExpressionType symTable cond
     if condType /= TyBool
@@ -56,14 +78,18 @@ analyzeStatement symTable (IfElse cond thenBranch elseBranch) = do
             symTableElse <- analyzeBlock symTable elseBranch
             Right symTable
 
+-- Handle while loop
 analyzeStatement symTable (While cond body) = do
     condType <- inferExpressionType symTable cond
     if condType /= TyBool
         then Left "Condition in 'while' must evaluate to a boolean."
         else analyzeBlock symTable body
 
+-- Handle println and print
 analyzeStatement symTable (Println expr) = inferExpressionType symTable expr >> Right symTable
 analyzeStatement symTable (Print expr) = inferExpressionType symTable expr >> Right symTable
+
+-- Catch unsupported or unrecognized statements
 analyzeStatement _ _ = Left "Unsupported statement encountered in semantic analysis."
 
 -- Infer the type of expressions
