@@ -3,5 +3,6 @@ fun main() {
     while (count < 5) {
         println(count)
         count = count + 1
+        return
     }
 }

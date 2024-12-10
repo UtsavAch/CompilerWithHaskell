@@ -25,6 +25,10 @@ analyzeStatements symTable (stmt:rest) = do
 
 -- Analyze a single statement
 analyzeStatement :: SymbolTable -> Exp -> Either String SymbolTable
+-- Handle return
+analyzeStatement symTable Return = 
+    Right symTable
+
 -- Handle variable declaration with initialization
 analyzeStatement symTable (Decl varType [Assign (Var name) expr]) = do
     if Map.member name symTable

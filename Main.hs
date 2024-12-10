@@ -44,7 +44,7 @@ main = do
             putStrLn "No Semantic Error"
 
             -- Generate and print the IR code
-            putStrLn "---- GENERATED CODE ----"
+            putStrLn "---- INTERMEDIATE CODE ----"
             let irCode = runCodeGen (transProg parsedTree)
             printIR irCode
 
@@ -56,7 +56,3 @@ main = do
 -- print a list of IR instructions
 printIR :: [Instr] -> IO ()
 printIR = mapM_ print
-
--- print a horizontal line
-line :: IO ()
-line = putStrLn (replicate 40 '-')
