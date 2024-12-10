@@ -23,7 +23,6 @@ data Instr
   | PRINT Temp                    -- print value
   | PRINTLN Temp                  -- print string
   | READ Temp                     -- read user input
-  | WHILE (Instr) [Instr]        -- Represents a while loop: condition + body
   deriving (Eq, Show)
 
 data BinOp
